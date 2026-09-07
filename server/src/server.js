@@ -4,11 +4,19 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { CaseEngine } from './brain/case-engine.js';
 import { MockProvider } from './providers/mock-provider.js';
+import { OpenAIProvider } from './providers/openai-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const casePath = path.resolve(__dirname, '../cases/midnight-hotel.json');
 const caseData = JSON.parse(await readFile(casePath, 'utf8'));
-const engine = new CaseEngine({ caseData, provider: new MockProvider() });
+
+const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
+const provider = hasOpenAI
+  ? new OpenAIProvider()
+  : new MockProvider();
+
+const providerName = hasOpenAI ? `openai:${process.env.OPENAI_MODEL || 'gpt-5.6-luna'}` : 'mock';
+const engine = new CaseEngine({ caseData, provider });
 const PORT = Number(process.env.PORT || 8787);
 
 function send(res, status, body) {
@@ -33,7 +41,13 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (req.method === 'GET' && req.url === '/api/health') {
-      return send(res, 200, { ok: true, brain: 'investigation-v0.1', caseId: caseData.id });
+      return send(res, 200, {
+        ok: true,
+        brain: 'investigation-v0.2',
+        caseId: caseData.id,
+        provider: providerName,
+        liveAI: hasOpenAI
+      });
     }
 
     if (req.method === 'POST' && req.url === '/api/session') {
@@ -63,5 +77,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Investigation brain running on http://localhost:${PORT}`);
+  console.log(`Investigation brain running on http://localhost:${PORT} using ${providerName}`);
 });
