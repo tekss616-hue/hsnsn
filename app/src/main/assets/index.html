@@ -3,36 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#09090d" />
-  <title>Template Lab</title>
+  <meta name="theme-color" content="#030507" />
+  <title>Investigation</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="app-shell">
-    <section id="homeScreen" class="screen active-screen">
-      <header class="hero">
-        <span class="eyebrow">TEMPLATE LAB</span>
-        <h1>اختر نوع القالب</h1>
-        <p>كل قسم له شاشة مستقلة وتجهيزاته الخاصة. اختر النوع وابدأ المونتاج.</p>
-      </header>
-      <div class="category-grid">
-        <button class="category-card horror" data-category="horror"><span class="cat-icon">👁️</span><strong>رعب</strong><small>Glitch • Flash • Dark Shake</small></button>
-        <button class="category-card action" data-category="action"><span class="cat-icon">⚡</span><strong>أكشن</strong><small>Shake • Zoom • Impact</small></button>
-        <button class="category-card ads" data-category="ads"><span class="cat-icon">📣</span><strong>إعلانات شركات</strong><small>Clean • Punch • Product Focus</small></button>
-        <button class="category-card general" data-category="general"><span class="cat-icon">🎬</span><strong>عام</strong><small>قوالب ومؤثرات متنوعة</small></button>
-        <button class="category-card anime" data-category="anime"><span class="cat-icon">🔥</span><strong>تجميعات أنمي</strong><small>Beat • Impact • Anime Combo</small></button>
+  <main id="intro" class="intro" aria-label="مقدمة اللعبة">
+    <button id="skipIntro" class="skip">تخطي</button>
+    <div class="rain"></div><div class="grain"></div><div class="police-glow red"></div><div class="police-glow blue"></div>
+
+    <section class="scene scene-hotel">
+      <div class="moon"></div><div class="hotel">
+        <div class="hotel-sign">MIDNIGHT HOTEL</div>
+        <div class="windows"></div><div class="door"></div>
       </div>
+      <div class="street-reflection"></div>
     </section>
-    <section id="editorScreen" class="screen">
-      <div class="type-topbar"><button id="backHome" class="back-btn">← الأقسام</button><div><span class="eyebrow" id="categoryEyebrow">TYPE</span><h1 id="categoryTitle">أكشن</h1></div></div>
-      <div id="categoryPreset" class="preset-banner"></div>
-      <section class="panel"><label class="upload-box" for="videoInput"><strong>＋ أضف الفيديو</strong><span>MP4 / MOV / WebM</span></label><input id="videoInput" type="file" accept="video/*" hidden /><div class="preview-wrap" id="previewWrap"><video id="video" playsinline controls></video><div class="flash-layer" id="flashLayer"></div><div class="glitch-layer" id="glitchLayer"></div><div class="empty-preview" id="emptyPreview">أضف مقطعك هنا</div></div></section>
-      <section class="panel"><div class="section-head"><div><span class="eyebrow">القص</span><h2>حدد الجزء المطلوب</h2></div><button class="small-btn" id="useCurrentStart">بداية من المؤشر</button></div><div class="trim-grid"><label>البداية <input id="startTime" type="number" min="0" step="0.1" value="0"></label><label>النهاية <input id="endTime" type="number" min="0" step="0.1" value="0"></label></div><div class="row-actions"><button class="ghost-btn" id="previewTrim">معاينة الجزء</button><button class="ghost-btn" id="useCurrentEnd">النهاية من المؤشر</button></div></section>
-      <section class="panel"><div class="section-head"><div><span class="eyebrow">المؤثرات</span><h2 id="effectsTitle">مؤثرات النوع</h2></div></div><div class="effect-grid" id="effectGrid"><button class="effect active" data-effect="combo">⚡ كومبو</button><button class="effect" data-effect="shake">💥 Shake</button><button class="effect" data-effect="zoom">🎯 Zoom Punch</button><button class="effect" data-effect="flash">✨ Impact Flash</button><button class="effect" data-effect="whip">💨 Whip</button><button class="effect" data-effect="glitch">📺 Glitch</button><button class="effect" data-effect="blur">🌪 Motion Blur</button><button class="effect" data-effect="stutter">⏩ Stutter</button></div><label class="range-label">قوة المؤثر <span id="intensityValue">70%</span></label><input id="intensity" type="range" min="10" max="100" value="70" /><label class="range-label">تكرار الضربة <span id="beatValue">0.65 ثانية</span></label><input id="beatInterval" type="range" min="30" max="150" value="65" /></section>
-      <section class="panel export-panel"><button class="primary-btn" id="exportBtn">تصدير الفيديو</button><div class="progress" id="progressWrap" hidden><div id="progressBar"></div></div><p class="status" id="status">جاهز.</p><a id="downloadLink" class="download-btn" hidden>تحميل النتيجة</a></section>
-      <section class="panel instructions"><details><summary>📘 تعليمات الاستخدام</summary><ol><li>اختر فيديو من جوالك.</li><li>حدد البداية والنهاية.</li><li>اختر المؤثر المناسب للقسم.</li><li>اضبط القوة وتكرار الضربات.</li><li>عاين ثم صدّر الفيديو.</li></ol></details></section><canvas id="renderCanvas" hidden></canvas>
+
+    <section class="scene scene-corridor">
+      <div class="corridor-lines"></div><div class="crime-tape">RESTRICTED • INVESTIGATION • RESTRICTED</div>
+      <div class="evidence-card"><span>01</span><strong>00:04</strong><small>صوت ارتطام في الممر</small></div>
     </section>
-    <footer>hsnsn • Template Lab v2</footer>
+
+    <section class="scene scene-files">
+      <div class="case-label">CONFIDENTIAL / CASE FILE</div>
+      <div class="suspects">
+        <article><div class="silhouette"></div><b>SUSPECT 01</b><i>?</i></article>
+        <article><div class="silhouette"></div><b>SUSPECT 02</b><i>?</i></article>
+        <article><div class="silhouette"></div><b>SUSPECT 03</b><i>?</i></article>
+      </div>
+      <div class="evidence-strip"><span>CAM 03</span><span>ACCESS LOG</span><span>00:07 LOST</span></div>
+    </section>
+
+    <section class="scene scene-title">
+      <div class="final-copy"><span>CASE FILE // OPEN</span><h1>EVERYONE HAS A STORY.</h1><h2>SOMEONE IS LYING.</h2><div class="pulse-line"></div></div>
+    </section>
+  </main>
+
+  <main id="profile" class="profile" hidden>
+    <div class="profile-card"><span class="stamp">INVESTIGATOR FILE</span><h1>أنشئ ملف المحقق</h1><p>هذه هويتك داخل القضايا وغرف التحقيق.</p>
+      <label>اسم المحقق<input id="playerName" autocomplete="name" placeholder="اكتب اسمك"></label>
+      <label>البريد الإلكتروني<input id="playerEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
+      <button id="createProfile" class="primary">ابدأ التحقيق</button><button class="existing">لدي حساب بالفعل</button>
+    </div>
   </main>
   <script src="app.js"></script>
 </body>
