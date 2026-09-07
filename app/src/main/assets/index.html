@@ -1,57 +1,13 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#030507" />
-  <title>Investigation</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="onboarding.css" />
-</head>
-<body>
-  <main id="intro" class="intro" aria-label="مقدمة اللعبة">
-    <video
-      id="introVideo"
-      class="intro-video"
-      src="Wren-Hotel-Intro-Vertical-Final.mp4"
-      preload="auto"
-      autoplay
-      playsinline
-      webkit-playsinline
-      disablepictureinpicture
-      controlslist="nodownload noplaybackrate noremoteplayback"
-    ></video>
-    <div class="cinematic-vignette" aria-hidden="true"></div>
-    <button id="skipIntro" class="skip" type="button">تخطي</button>
-    <button id="resumeIntro" class="resume-intro" type="button" hidden>اضغط لتشغيل المقدمة</button>
-  </main>
-
-  <main id="envelopeScreen" class="envelope-screen" hidden>
-    <div class="desk-light"></div>
-    <div class="envelope-copy"><span>PRIVATE DELIVERY</span><h1>لديك رسالة سرية</h1><p>اضغط على الظرف لفتح ملفك.</p></div>
-    <button id="envelope" class="image-envelope" aria-label="فتح الظرف">
-      <img class="envelope-closed" src="media/envelope-closed.png" alt="ظرف أسود مغلق" />
-      <img class="envelope-open" src="media/envelope-open.png" alt="ظرف أسود مفتوح" />
-    </button>
-  </main>
-
-  <main id="profile" class="profile" hidden>
-    <div class="identity-paper">
-      <img class="identity-paper-bg" src="media/investigator-paper.png" alt="ورقة هوية المحقق" />
-      <div class="identity-form">
-        <h1>إنشاء هوية المحقق</h1>
-        <p>بياناتك الخاصة لا تظهر للاعبين. اسم المحقق فقط هو الذي يظهر داخل القضايا.</p>
-        <label>اسم المحقق<input id="playerName" autocomplete="username" maxlength="24" placeholder="الاسم الذي سيراه اللاعبون"></label>
-        <label>البريد الإلكتروني<input id="playerEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
-        <label>كلمة المرور<input id="playerPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 أحرف على الأقل"></label>
-        <label>تأكيد كلمة المرور<input id="playerPasswordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="أعد كتابة كلمة المرور"></label>
-        <div id="formError" class="form-error" role="alert"></div>
-        <button id="createProfile" class="primary">اعتماد هويتي</button>
-        <button id="existingAccount" class="existing">لدي هوية بالفعل — تسجيل الدخول</button>
-      </div>
-    </div>
-  </main>
-
-  <script src="app.js"></script>
-</body>
-</html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>Investigation</title>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="onboarding.css">
+</head><body>
+<main id="intro" class="intro" aria-label="مقدمة اللعبة"><video id="introVideo" class="intro-video" src="Wren-Hotel-Intro-Vertical-Final.mp4" preload="auto" autoplay playsinline webkit-playsinline disablepictureinpicture></video><div class="cinematic-vignette"></div><button id="skipIntro" class="skip">تخطي</button><button id="resumeIntro" class="resume-intro" hidden>اضغط لتشغيل المقدمة</button></main>
+<main id="quickSplash" class="quick-splash" hidden><div class="splash-mark">◈</div><div>INVESTIGATION DIVISION</div></main>
+<main id="envelopeScreen" class="envelope-screen" hidden><div class="desk-light"></div><div class="envelope-copy"><span>PRIVATE DELIVERY</span><h1>لديك رسالة سرية</h1><p>اضغط على الظرف لفتح ملفك.</p></div><button id="envelope" class="image-envelope"><img class="envelope-closed" src="media/envelope-closed.png"><img class="envelope-open" src="media/envelope-open.png"></button></main>
+<main id="profile" class="profile" hidden><div class="identity-paper"><img class="identity-paper-bg" src="media/investigator-paper.png"><div class="identity-form"><h1>إنشاء هوية المحقق</h1><p>بياناتك الخاصة لا تظهر للاعبين. اسم المحقق فقط هو الذي يظهر داخل القضايا.</p><label>اسم المحقق<input id="playerName" maxlength="24" placeholder="الاسم الذي سيراه اللاعبون"></label><label>البريد الإلكتروني<input id="playerEmail" type="email" placeholder="name@example.com"></label><label>كلمة المرور<input id="playerPassword" type="password" minlength="8" placeholder="8 أحرف على الأقل"></label><label>تأكيد كلمة المرور<input id="playerPasswordConfirm" type="password" minlength="8" placeholder="أعد كتابة كلمة المرور"></label><div id="formError" class="form-error"></div><button id="createProfile" class="primary">اعتماد هويتي</button><div class="or"><span>أو</span></div><button id="googleAuth" class="google-auth"><b>G</b> المتابعة باستخدام Google</button><button id="existingAccount" class="existing">لدي هوية بالفعل — تسجيل الدخول</button></div></div></main>
+<main id="hq" class="hq" hidden><img id="hqBackground" class="hq-bg" alt=""><div class="hq-shade"></div><header class="hq-top"><div><small>INVESTIGATION DIVISION</small><strong id="hqName">المحقق</strong></div><button id="hqSettings" class="icon-btn">⚙</button></header><section class="case-zone"><div class="case-column free"><div class="case-heading"><span>القضايا المجانية</span><small>حتى 6 لاعبين</small></div><div id="freeCases" class="case-grid"></div></div><div class="case-column premium"><div class="case-heading"><span>القضايا الخاصة</span><small>حتى 10 لاعبين</small></div><div id="premiumCases" class="case-grid"></div></div></section><nav class="hq-nav"><button class="active">القضايا</button><button>الملف</button><button>التصنيف</button></nav></main>
+<div id="settingsSheet" class="settings-sheet" hidden><div class="settings-card"><button id="closeSettings" class="close">×</button><h2>الإعدادات</h2><button id="replayIntro" class="setting-action">إعادة مشاهدة المقدمة السينمائية</button></div></div>
+<script src="app.js"></script></body></html>
