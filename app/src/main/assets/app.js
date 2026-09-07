@@ -9,7 +9,7 @@ const rain=document.getElementById('rainAudio');
 const impact=document.getElementById('impactAudio');
 const police=document.getElementById('policeAudio');
 const boom=document.getElementById('boomAudio');
-let finished=false,envelopeOpened=false;
+let finished=false,envelopeOpened=false,currentScene=0;
 const timers=[];
 
 rain.volume=.34; impact.volume=.78; police.volume=.22; boom.volume=.72;
@@ -18,10 +18,27 @@ function later(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id}
 function stopTimers(){timers.splice(0).forEach(clearTimeout)}
 function safePlay(a){if(!a)return;const p=a.play();if(p?.catch)p.catch(()=>{})}
 function fadeAudio(a,target,duration){if(!a)return;const start=a.volume,steps=18,delta=(target-start)/steps;let i=0;const id=setInterval(()=>{i++;a.volume=Math.max(0,Math.min(1,start+delta*i));if(i>=steps){clearInterval(id);if(target===0){a.pause();a.currentTime=0}}},duration/steps)}
-function showScene(index){scenes.forEach((s,i)=>s.classList.toggle('active',i===index))}
+function showScene(index){
+  currentScene=index;
+  scenes.forEach((s,i)=>{
+    const active=i===index;
+    s.classList.toggle('active',active);
+    if(active){
+      const img=s.querySelector('.scene-picture img');
+      if(img){img.style.animation='none';void img.offsetWidth;img.style.animation=''}
+    }
+  });
+}
+function flashLightning(){
+  if(finished||currentScene!==0)return;
+  intro.classList.remove('lightning');void intro.offsetWidth;intro.classList.add('lightning');
+  later(()=>intro.classList.remove('lightning'),560);
+}
 
 function startIntro(){
   showScene(0);safePlay(rain);
+  later(flashLightning,1250);
+  later(flashLightning,2650);
   later(()=>showScene(1),3200);
   later(()=>safePlay(impact),4450);
   later(()=>{intro.classList.add('police-on');safePlay(police);fadeAudio(police,.34,1700)},5150);
