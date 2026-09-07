@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id);
 const intro=$('intro'),video=$('introVideo'),resume=$('resumeIntro'),envelopeScreen=$('envelopeScreen'),envelope=$('envelope'),profile=$('profile'),hq=$('hq'),error=$('formError'),splash=$('quickSplash');
-let finished=false,opened=false,authMode='create',authBusy=false,hqLoaded='';
+let finished=false,opened=false,authMode='create',authBusy=false,hqLoaded='',pendingGoogleProfile=null;
 window.VEILMARK_PERF={bootStart:performance.now()};
 
 const store={
@@ -47,35 +47,24 @@ function loadHQ(){
   im.src=src;
 }
 
-function warmImage(src){
-  const im=new Image();
-  im.decoding='async';
-  im.src=src;
-}
-
-function idle(fn,delay=0){
-  const go=()=>('requestIdleCallback'in window?requestIdleCallback(fn,{timeout:900}):setTimeout(fn,0));
-  delay?setTimeout(go,delay):go();
-}
-
+function warmImage(src){const im=new Image();im.decoding='async';im.src=src}
+function idle(fn,delay=0){const go=()=>('requestIdleCallback'in window?requestIdleCallback(fn,{timeout:900}):setTimeout(fn,0));delay?setTimeout(go,delay):go()}
 function nativeReady(){return typeof NativeAuth!=='undefined'}
-function warmNativeAuth(){
-  if(!nativeReady()||typeof NativeAuth.warmAuth!=='function')return;
-  try{NativeAuth.warmAuth()}catch{}
-}
+function warmNativeAuth(){if(!nativeReady()||typeof NativeAuth.warmAuth!=='function')return;try{NativeAuth.warmAuth()}catch{}}
+function warmOnboarding(){idle(()=>{warmImage('media/envelope-closed.webp');warmImage('media/envelope-open.webp')},450);idle(()=>warmImage('media/investigator-paper.webp'),1100);idle(warmNativeAuth,1600)}
+function hideAll(){[intro,envelopeScreen,profile,hq,splash].forEach(x=>x&&(x.hidden=true))}
 
-function warmOnboarding(){
-  idle(()=>{
-    warmImage('media/envelope-closed.webp');
-    warmImage('media/envelope-open.webp');
-  },450);
-  idle(()=>warmImage('media/investigator-paper.webp'),1100);
-  idle(warmNativeAuth,1600);
+function stopSceneAudio(){
+  try{video.pause()}catch{}
 }
-
-function hideAll(){
-  [intro,envelopeScreen,profile,hq,splash].forEach(x=>x&&(x.hidden=true));
+function resumeCurrentSceneAudio(){
+  if(!intro.hidden&&!finished){
+    try{const p=video.play();p?.catch(()=>resume.hidden=false)}catch{resume.hidden=false}
+  }
 }
+window.onNativeAppPause=stopSceneAudio;
+window.onNativeAppResume=resumeCurrentSceneAudio;
+document.addEventListener('visibilitychange',()=>document.hidden?stopSceneAudio():resumeCurrentSceneAudio());
 
 function setCaseView(view){
   const next=view==='premium'?'premium':'free';
@@ -86,6 +75,7 @@ function setCaseView(view){
 }
 
 function showHQ(name){
+  stopSceneAudio();
   hideAll();
   hq.hidden=false;
   $('hqName').textContent=name||store.get('investigator_name','المحقق');
@@ -98,7 +88,7 @@ function showHQ(name){
 function showEnvelope(){
   if(finished)return;
   finished=true;
-  try{video.pause()}catch{}
+  stopSceneAudio();
   store.set('intro_seen',true);
   envelopeScreen.hidden=false;
   envelopeScreen.classList.remove('visible');
@@ -107,15 +97,11 @@ function showEnvelope(){
   window.VEILMARK_PERF.envelopeVisible=performance.now();
   warmImage('media/investigator-paper.webp');
   warmNativeAuth();
-  setTimeout(()=>{
-    intro.hidden=true;
-    intro.classList.remove('intro-exit');
-  },170);
+  setTimeout(()=>{intro.hidden=true;intro.classList.remove('intro-exit')},170);
 }
 
 function startIntro(force=false){
-  finished=false;
-  opened=false;
+  finished=false;opened=false;pendingGoogleProfile=null;
   envelope.classList.remove('opening','depart');
   envelopeScreen.classList.remove('visible');
   profile.classList.remove('ready');
@@ -123,15 +109,7 @@ function startIntro(force=false){
   intro.hidden=false;
   if(force)store.set('intro_seen',false);
   warmOnboarding();
-  requestAnimationFrame(()=>{
-    try{
-      video.currentTime=0;
-      video.muted=false;
-      video.volume=1;
-      const p=video.play();
-      p?.catch(()=>resume.hidden=false);
-    }catch{resume.hidden=false}
-  });
+  requestAnimationFrame(()=>{try{video.currentTime=0;video.muted=false;video.volume=1;const p=video.play();p?.catch(()=>resume.hidden=false)}catch{resume.hidden=false}});
 }
 
 function openEnvelope(){
@@ -141,48 +119,40 @@ function openEnvelope(){
   envelope.classList.add('opening');
   warmNativeAuth();
   setTimeout(()=>envelope.classList.add('depart'),120);
-  setTimeout(()=>{
-    profile.hidden=false;
-    profile.classList.add('ready');
-    window.VEILMARK_PERF.profileVisible=performance.now();
-  },150);
-  setTimeout(()=>{
-    envelopeScreen.hidden=true;
-    envelopeScreen.classList.remove('visible');
-  },380);
+  setTimeout(()=>{profile.hidden=false;profile.classList.add('ready');window.VEILMARK_PERF.profileVisible=performance.now()},150);
+  setTimeout(()=>{envelopeScreen.hidden=true;envelopeScreen.classList.remove('visible')},380);
 }
 
 function setAuthMode(mode){
-  authMode=mode;
-  error.textContent='';
-  const isLogin=mode==='login';
-  document.querySelector('.identity-form h1').textContent=isLogin?'تسجيل دخول المحقق':'إنشاء هوية المحقق';
-  $('playerName').closest('label').hidden=isLogin;
-  $('playerPasswordConfirm').closest('label').hidden=isLogin;
-  $('createProfile').textContent=isLogin?'تسجيل الدخول':'اعتماد هويتي';
-  $('existingAccount').textContent=isLogin?'إنشاء هوية جديدة':'لدي هوية بالفعل — تسجيل الدخول';
+  authMode=mode;error.textContent='';
+  const isLogin=mode==='login',isName=mode==='googleName';
+  const nameLabel=$('playerName').closest('label'),emailLabel=$('playerEmail').closest('label'),passLabel=$('playerPassword').closest('label'),confirmLabel=$('playerPasswordConfirm').closest('label');
+  document.querySelector('.identity-form h1').textContent=isName?'اختر اسم المحقق':(isLogin?'تسجيل دخول المحقق':'إنشاء هوية المحقق');
+  document.querySelector('.identity-form p').textContent=isName?'اختر الاسم الذي سيظهر للاعبين داخل القضايا. حساب Google يبقى خاصًا.':'بياناتك الخاصة لا تظهر للاعبين. اسم المحقق فقط هو الذي يظهر داخل القضايا.';
+  nameLabel.hidden=isLogin;
+  emailLabel.hidden=isName;
+  passLabel.hidden=isName;
+  confirmLabel.hidden=isLogin||isName;
+  $('googleAuth').hidden=isName;
+  document.querySelector('.or').hidden=isName;
+  $('existingAccount').hidden=isName;
+  $('createProfile').textContent=isName?'اعتماد اسم المحقق':(isLogin?'تسجيل الدخول':'اعتماد هويتي');
+  if(!isName){$('googleAuth').hidden=false;document.querySelector('.or').hidden=false;$('existingAccount').hidden=false;$('existingAccount').textContent=isLogin?'إنشاء هوية جديدة':'لدي هوية بالفعل — تسجيل الدخول'}
+  if(isName){$('playerName').value='';setTimeout(()=>$('playerName')?.focus(),80)}
   warmNativeAuth();
 }
 
+function showGoogleNameStep(r){
+  pendingGoogleProfile={email:r.email||'',uid:r.uid||''};
+  stopSceneAudio();hideAll();profile.hidden=false;profile.classList.add('ready');setAuthMode('googleName');
+}
+
 function boot(){
-  const name=store.get('investigator_name');
-  renderCases();
+  const name=store.get('investigator_name');renderCases();
   if(store.get('intro_seen',false)){
-    hideAll();
-    splash.hidden=false;
-    requestAnimationFrame(()=>window.VEILMARK_PERF.firstFrame=performance.now());
-    setTimeout(()=>{
-      if(name)showHQ(name);
-      else{
-        splash.hidden=true;
-        profile.hidden=false;
-        profile.classList.add('ready');
-        idle(warmNativeAuth,250);
-      }
-    },160);
-  }else{
-    startIntro();
-  }
+    hideAll();splash.hidden=false;requestAnimationFrame(()=>window.VEILMARK_PERF.firstFrame=performance.now());
+    setTimeout(()=>{if(name)showHQ(name);else{splash.hidden=true;profile.hidden=false;profile.classList.add('ready');idle(warmNativeAuth,250)}},160);
+  }else startIntro();
 }
 
 function friendlyAuthError(msg=''){
@@ -195,94 +165,57 @@ function friendlyAuthError(msg=''){
 }
 
 function setAuthBusy(on,label=''){
-  authBusy=on;
-  const primary=$('createProfile'),google=$('googleAuth');
-  primary.disabled=on;
-  google.disabled=on;
-  primary.classList.toggle('busy',on&&label!=='google');
-  google.classList.toggle('busy',on&&label==='google');
-  if(on)error.textContent=label==='google'?'يفتح Google الآن…':'جارٍ التحقق…';
+  authBusy=on;const primary=$('createProfile'),google=$('googleAuth');primary.disabled=on;google.disabled=on;
+  primary.classList.toggle('busy',on&&label!=='google');google.classList.toggle('busy',on&&label==='google');
+  if(on)error.textContent=label==='google'?'يفتح Google الآن…':(label==='name'?'جارٍ اعتماد الاسم…':'جارٍ التحقق…');
 }
 
 window.onNativeAuthResult=r=>{
   setAuthBusy(false);
-  if(!r||!r.ok){
-    if(r?.action!=='restore')error.textContent=friendlyAuthError(r?.message);
-    return;
-  }
+  if(!r||!r.ok){if(r?.action!=='restore')error.textContent=friendlyAuthError(r?.message);return}
   if(r.action==='logout'){
-    store.del('investigator_name');
-    store.del('profile_cache');
-    setAuthMode('login');
-    hideAll();
-    profile.hidden=false;
-    profile.classList.add('ready');
-    return;
+    store.del('investigator_name');store.del('profile_cache');pendingGoogleProfile=null;setAuthMode('login');hideAll();profile.hidden=false;profile.classList.add('ready');return;
+  }
+  if(r.action==='google'){showGoogleNameStep(r);return}
+  if(r.action==='playerName'){
+    const name=$('playerName').value.trim();
+    store.set('investigator_name',name);
+    store.set('profile_cache',{name,email:pendingGoogleProfile?.email||r.email||'',uid:pendingGoogleProfile?.uid||r.uid||''});
+    pendingGoogleProfile=null;showHQ(name);return;
   }
   const fallback=$('playerName').value.trim()||'المحقق';
-  const name=(r.name||fallback).trim();
+  const name=(authMode==='create'?fallback:(r.name||fallback)).trim();
   store.set('investigator_name',name);
   store.set('profile_cache',{name,email:r.email||$('playerEmail').value.trim(),uid:r.uid||''});
   showHQ(name);
 };
 
 video.addEventListener('ended',showEnvelope);
-video.addEventListener('error',()=>{
-  resume.hidden=false;
-  resume.textContent='تعذر تشغيل المقدمة — اضغط للمتابعة';
-  resume.onclick=showEnvelope;
-});
-video.addEventListener('playing',()=>{
-  resume.hidden=true;
-  window.VEILMARK_PERF.introPlaying=performance.now();
-});
-$('skipIntro').onclick=showEnvelope;
-resume.onclick=()=>video.play();
-envelope.onclick=openEnvelope;
+video.addEventListener('error',()=>{resume.hidden=false;resume.textContent='تعذر تشغيل المقدمة — اضغط للمتابعة';resume.onclick=showEnvelope});
+video.addEventListener('playing',()=>{resume.hidden=true;window.VEILMARK_PERF.introPlaying=performance.now()});
+$('skipIntro').onclick=showEnvelope;resume.onclick=()=>video.play();envelope.onclick=openEnvelope;
 
 $('createProfile').onclick=()=>{
   if(authBusy)return;
   const name=$('playerName').value.trim(),email=$('playerEmail').value.trim(),p=$('playerPassword').value,c=$('playerPasswordConfirm').value;
   error.textContent='';
+  if(authMode==='googleName'){
+    if(name.length<2)return error.textContent='اكتب اسم محقق من حرفين على الأقل.';
+    if(!nativeReady()||typeof NativeAuth.updatePlayerName!=='function')return error.textContent='تعذر اعتماد الاسم في هذه النسخة.';
+    setAuthBusy(true,'name');requestAnimationFrame(()=>NativeAuth.updatePlayerName(name));return;
+  }
   if(authMode==='create'&&name.length<2)return error.textContent='اكتب اسم محقق من حرفين على الأقل.';
   if(!/^\S+@\S+\.\S+$/.test(email))return error.textContent='تأكد من البريد الإلكتروني.';
   if(p.length<8)return error.textContent='كلمة المرور يجب أن تكون 8 أحرف على الأقل.';
   if(authMode==='create'&&p!==c)return error.textContent='كلمتا المرور غير متطابقتين.';
   if(!nativeReady())return error.textContent='خدمة تسجيل الدخول غير متاحة في هذه النسخة.';
-  setAuthBusy(true,'email');
-  requestAnimationFrame(()=>{
-    if(authMode==='create')NativeAuth.createAccount(name,email,p);
-    else NativeAuth.signInEmail(email,p);
-  });
+  setAuthBusy(true,'email');requestAnimationFrame(()=>{if(authMode==='create')NativeAuth.createAccount(name,email,p);else NativeAuth.signInEmail(email,p)});
 };
 
-$('googleAuth').onclick=()=>{
-  if(authBusy)return;
-  if(!nativeReady())return error.textContent='خدمة Google غير متاحة في هذه النسخة.';
-  setAuthBusy(true,'google');
-  requestAnimationFrame(()=>NativeAuth.signInGoogle());
-};
-
+$('googleAuth').onclick=()=>{if(authBusy)return;if(!nativeReady())return error.textContent='خدمة Google غير متاحة في هذه النسخة.';setAuthBusy(true,'google');requestAnimationFrame(()=>NativeAuth.signInGoogle())};
 $('existingAccount').onclick=()=>setAuthMode(authMode==='create'?'login':'create');
 document.querySelectorAll('.case-tab').forEach(b=>b.onclick=()=>setCaseView(b.dataset.view));
-$('hqSettings').onclick=()=>$('settingsSheet').hidden=false;
-$('closeSettings').onclick=()=>$('settingsSheet').hidden=true;
-$('replayIntro').onclick=()=>{$('settingsSheet').hidden=true;startIntro(true)};
-
-let resizeTimer;
-window.addEventListener('resize',()=>{
-  if(!hq.hidden){
-    clearTimeout(resizeTimer);
-    resizeTimer=setTimeout(loadHQ,140);
-  }
-},{passive:true});
-
-document.addEventListener('click',e=>{
-  const c=e.target.closest?.('.case-card');
-  if(c){
-    store.set('last_case',c.dataset.case);
-    c.animate([{transform:'scale(.985)'},{transform:'scale(1)'}],{duration:100});
-  }
-});
-
+$('hqSettings').onclick=()=>$('settingsSheet').hidden=false;$('closeSettings').onclick=()=>$('settingsSheet').hidden=true;$('replayIntro').onclick=()=>{$('settingsSheet').hidden=true;startIntro(true)};
+let resizeTimer;window.addEventListener('resize',()=>{if(!hq.hidden){clearTimeout(resizeTimer);resizeTimer=setTimeout(loadHQ,140)}},{passive:true});
+document.addEventListener('click',e=>{const c=e.target.closest?.('.case-card');if(c){store.set('last_case',c.dataset.case);c.animate([{transform:'scale(.985)'},{transform:'scale(1)'}],{duration:100})}});
 boot();
