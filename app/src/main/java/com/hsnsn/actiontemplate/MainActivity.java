@@ -48,8 +48,6 @@ public class MainActivity extends Activity {
         getWindow().setStatusBarColor(Color.BLACK);
         getWindow().setNavigationBarColor(Color.BLACK);
 
-        // Keep cold start focused on painting the first frame. Firebase/Credential Manager
-        // are warmed later by JavaScript while the intro is already visible.
         webView = new WebView(this);
         webView.setBackgroundColor(Color.BLACK);
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -112,6 +110,11 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) { }
     }
 
+    private void notifyJs(String functionName) {
+        if (webView == null) return;
+        webView.evaluateJavascript("window." + functionName + "&&window." + functionName + "()", null);
+    }
+
     public class AuthBridge {
         @JavascriptInterface
         public void warmAuth() {
@@ -129,9 +132,6 @@ public class MainActivity extends Activity {
                             sendAuthResult(false, "create", null, "تعذر إنشاء الحساب.");
                             return;
                         }
-
-                        // Do not make the player wait for the cosmetic display-name write.
-                        // The web layer already has the chosen investigator name locally.
                         sendAuthResult(true, "create", user, null);
                         UserProfileChangeRequest update = new UserProfileChangeRequest.Builder()
                             .setDisplayName(name)
@@ -202,6 +202,22 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void updatePlayerName(String name) {
+            runOnUiThread(() -> {
+                ensureFirebaseAuth();
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    sendAuthResult(false, "playerName", null, "انتهت جلسة تسجيل الدخول. حاول مرة أخرى.");
+                    return;
+                }
+                UserProfileChangeRequest update = new UserProfileChangeRequest.Builder().setDisplayName(name).build();
+                user.updateProfile(update)
+                    .addOnSuccessListener(v -> sendAuthResult(true, "playerName", user, null))
+                    .addOnFailureListener(e -> sendAuthResult(false, "playerName", null, e.getLocalizedMessage()));
+            });
+        }
+
+        @JavascriptInterface
         public void signOut() {
             runOnUiThread(() -> {
                 ensureFirebaseAuth();
@@ -218,6 +234,18 @@ public class MainActivity extends Activity {
                 sendAuthResult(user != null, "restore", user, null);
             });
         }
+    }
+
+    @Override
+    protected void onPause() {
+        if (webView != null) notifyJs("onNativeAppPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) notifyJs("onNativeAppResume");
     }
 
     @Override
