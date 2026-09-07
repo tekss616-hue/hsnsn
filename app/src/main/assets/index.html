@@ -10,62 +10,20 @@
 </head>
 <body>
   <main id="intro" class="intro" aria-label="مقدمة اللعبة">
-    <button id="skipIntro" class="skip">تخطي</button>
-    <div class="cinematic-vignette"></div>
-    <div class="rain-overlay"></div>
-    <div class="police-glow red"></div>
-    <div class="police-glow blue"></div>
-
-    <section class="scene scene-1 active" data-scene="1">
-      <picture class="scene-picture">
-        <source media="(orientation: portrait)" srcset="media/hotel-portrait.png" />
-        <img src="media/hotel-landscape.png" alt="فندق Wren في ليلة ممطرة" />
-      </picture>
-      <div class="live-layer hotel-windows"></div>
-      <div class="live-layer moving-mist mist-a"></div>
-      <div class="live-layer moving-mist mist-b"></div>
-      <div class="live-layer wet-reflection"></div>
-      <div class="lightning-flash"></div>
-    </section>
-
-    <section class="scene scene-2" data-scene="2">
-      <picture class="scene-picture">
-        <source media="(orientation: portrait)" srcset="media/corridor-portrait.png" />
-        <img src="media/corridor-landscape.png" alt="ممر فندق غامض" />
-      </picture>
-      <div class="live-layer corridor-light"></div>
-      <div class="live-layer corridor-shadow"></div>
-      <div class="live-layer corridor-haze"></div>
-    </section>
-
-    <section class="scene scene-3" data-scene="3">
-      <picture class="scene-picture">
-        <source media="(orientation: portrait)" srcset="media/crime-portrait.png" />
-        <img src="media/crime-landscape.png" alt="مسرح تحقيق داخل غرفة الفندق" />
-      </picture>
-      <div class="live-layer room-breath"></div>
-      <div class="live-layer window-rain-glow"></div>
-      <div class="live-layer evidence-sweep"></div>
-    </section>
-
-    <section class="scene scene-4" data-scene="4">
-      <picture class="scene-picture">
-        <source media="(orientation: portrait)" srcset="media/desk-portrait.png" />
-        <img src="media/desk-landscape.png" alt="طاولة ملفات ومشتبه بهم" />
-      </picture>
-      <div class="live-layer desk-lamp"></div>
-      <div class="live-layer dust-particles"></div>
-      <div class="live-layer desk-shadow"></div>
-    </section>
-
-    <section class="scene scene-title" data-scene="5">
-      <div class="final-copy" dir="ltr">
-        <span>CONFIDENTIAL // INVESTIGATION DIVISION</span>
-        <h1>EVERYONE HAS A STORY.</h1>
-        <h2>SOMEONE IS LYING.</h2>
-        <div class="pulse-line"></div>
-      </div>
-    </section>
+    <video
+      id="introVideo"
+      class="intro-video"
+      src="Wren-Hotel-Intro-Vertical-Final.mp4"
+      preload="auto"
+      autoplay
+      playsinline
+      webkit-playsinline
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate noremoteplayback"
+    ></video>
+    <div class="cinematic-vignette" aria-hidden="true"></div>
+    <button id="skipIntro" class="skip" type="button">تخطي</button>
+    <button id="resumeIntro" class="resume-intro" type="button" hidden>اضغط لتشغيل المقدمة</button>
   </main>
 
   <main id="envelopeScreen" class="envelope-screen" hidden>
@@ -94,10 +52,6 @@
     </div>
   </main>
 
-  <audio id="rainAudio" src="media/rain.wav" preload="auto" loop></audio>
-  <audio id="impactAudio" src="media/impact.wav" preload="auto"></audio>
-  <audio id="policeAudio" src="media/police.mp3" preload="auto"></audio>
-  <audio id="boomAudio" src="media/boom.mp3" preload="auto"></audio>
   <script src="app.js"></script>
 </body>
 </html>
