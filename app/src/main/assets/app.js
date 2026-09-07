@@ -1,59 +1,44 @@
 const intro=document.getElementById('intro');
+const introVideo=document.getElementById('introVideo');
+const resumeIntro=document.getElementById('resumeIntro');
 const envelopeScreen=document.getElementById('envelopeScreen');
 const envelope=document.getElementById('envelope');
 const profile=document.getElementById('profile');
 const skip=document.getElementById('skipIntro');
 const formError=document.getElementById('formError');
-const scenes=[...document.querySelectorAll('.scene')];
-const rain=document.getElementById('rainAudio');
-const impact=document.getElementById('impactAudio');
-const police=document.getElementById('policeAudio');
-const boom=document.getElementById('boomAudio');
-let finished=false,envelopeOpened=false,currentScene=0;
-const timers=[];
-
-rain.volume=.34; impact.volume=.78; police.volume=.22; boom.volume=.72;
-
-function later(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id}
-function stopTimers(){timers.splice(0).forEach(clearTimeout)}
-function safePlay(a){if(!a)return;const p=a.play();if(p?.catch)p.catch(()=>{})}
-function fadeAudio(a,target,duration){if(!a)return;const start=a.volume,steps=18,delta=(target-start)/steps;let i=0;const id=setInterval(()=>{i++;a.volume=Math.max(0,Math.min(1,start+delta*i));if(i>=steps){clearInterval(id);if(target===0){a.pause();a.currentTime=0}}},duration/steps)}
-function showScene(index){
-  currentScene=index;
-  scenes.forEach((s,i)=>{
-    const active=i===index;
-    s.classList.toggle('active',active);
-    if(active){
-      const img=s.querySelector('.scene-picture img');
-      if(img){img.style.animation='none';void img.offsetWidth;img.style.animation=''}
-    }
-  });
-}
-function flashLightning(){
-  if(finished||currentScene!==0)return;
-  intro.classList.remove('lightning');void intro.offsetWidth;intro.classList.add('lightning');
-  later(()=>intro.classList.remove('lightning'),560);
-}
-
-function startIntro(){
-  showScene(0);safePlay(rain);
-  later(flashLightning,1250);
-  later(flashLightning,2650);
-  later(()=>showScene(1),3200);
-  later(()=>safePlay(impact),4450);
-  later(()=>{intro.classList.add('police-on');safePlay(police);fadeAudio(police,.34,1700)},5150);
-  later(()=>showScene(2),6400);
-  later(()=>showScene(3),9600);
-  later(()=>{showScene(4);safePlay(boom);fadeAudio(rain,.12,1200);fadeAudio(police,.1,1200)},12600);
-  later(showEnvelope,15300);
-}
+let finished=false,envelopeOpened=false;
 
 function showEnvelope(){
   if(finished)return;
-  finished=true;stopTimers();
-  fadeAudio(rain,0,500);fadeAudio(police,0,500);
-  intro.style.transition='opacity .55s ease';intro.style.opacity='0';
-  setTimeout(()=>{intro.hidden=true;envelopeScreen.hidden=false;document.body.style.overflow='hidden';},560);
+  finished=true;
+  try{introVideo.pause()}catch(e){}
+  intro.classList.add('intro-exit');
+  setTimeout(()=>{
+    intro.hidden=true;
+    envelopeScreen.hidden=false;
+    document.body.style.overflow='hidden';
+  },500);
+}
+
+function tryStartIntro(){
+  if(!introVideo)return;
+  introVideo.currentTime=0;
+  introVideo.muted=false;
+  introVideo.volume=1;
+  const p=introVideo.play();
+  if(p?.then){
+    p.then(()=>{resumeIntro.hidden=true}).catch(()=>{resumeIntro.hidden=false});
+  }
+}
+
+function fitIntroVideo(){
+  if(!introVideo)return;
+  const vw=window.innerWidth||document.documentElement.clientWidth;
+  const vh=window.innerHeight||document.documentElement.clientHeight;
+  const ratio=vw/Math.max(1,vh);
+  intro.dataset.screenRatio=ratio.toFixed(3);
+  intro.classList.toggle('very-tall',ratio<0.50);
+  intro.classList.toggle('wide-portrait',ratio>0.59&&ratio<1);
 }
 
 function paperFoley(type='place'){
@@ -73,7 +58,16 @@ function openEnvelope(){
   setTimeout(()=>{envelopeScreen.hidden=true;profile.hidden=false;document.body.style.overflow='auto';requestAnimationFrame(()=>document.getElementById('playerName')?.focus())},2200);
 }
 
-skip.addEventListener('click',showEnvelope);envelope.addEventListener('click',openEnvelope);startIntro();
+introVideo.addEventListener('ended',showEnvelope);
+introVideo.addEventListener('error',()=>{resumeIntro.hidden=false;resumeIntro.textContent='تعذر تشغيل المقدمة — اضغط للمتابعة';resumeIntro.onclick=showEnvelope});
+introVideo.addEventListener('playing',()=>{resumeIntro.hidden=true});
+resumeIntro.addEventListener('click',tryStartIntro);
+skip.addEventListener('click',showEnvelope);
+envelope.addEventListener('click',openEnvelope);
+window.addEventListener('resize',fitIntroVideo,{passive:true});
+window.addEventListener('orientationchange',()=>setTimeout(fitIntroVideo,120),{passive:true});
+fitIntroVideo();
+tryStartIntro();
 
 document.getElementById('createProfile').addEventListener('click',()=>{
   const name=document.getElementById('playerName').value.trim();
