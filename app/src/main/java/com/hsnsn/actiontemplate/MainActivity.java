@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.content.Intent;
 import android.net.Uri;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.credentials.CredentialManager;
@@ -47,21 +48,21 @@ public class MainActivity extends Activity {
         getWindow().setStatusBarColor(Color.BLACK);
         getWindow().setNavigationBarColor(Color.BLACK);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        credentialManager = CredentialManager.create(this);
-
+        // Keep cold start focused on painting the first frame. Firebase/Credential Manager
+        // are warmed later by JavaScript while the intro is already visible.
         webView = new WebView(this);
         webView.setBackgroundColor(Color.BLACK);
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setContentView(webView);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setDefaultTextEncodingName("utf-8");
 
         webView.addJavascriptInterface(new AuthBridge(), "NativeAuth");
         webView.setWebViewClient(new WebViewClient());
@@ -78,6 +79,21 @@ public class MainActivity extends Activity {
             }
         });
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void ensureFirebaseAuth() {
+        if (firebaseAuth == null) firebaseAuth = FirebaseAuth.getInstance();
+    }
+
+    private void ensureCredentialManager() {
+        if (credentialManager == null) credentialManager = CredentialManager.create(this);
+    }
+
+    private void warmAuthComponents() {
+        runOnUiThread(() -> {
+            ensureFirebaseAuth();
+            ensureCredentialManager();
+        });
     }
 
     private void sendAuthResult(boolean ok, String action, FirebaseUser user, String message) {
@@ -98,33 +114,49 @@ public class MainActivity extends Activity {
 
     public class AuthBridge {
         @JavascriptInterface
+        public void warmAuth() {
+            warmAuthComponents();
+        }
+
+        @JavascriptInterface
         public void createAccount(String name, String email, String password) {
-            runOnUiThread(() -> firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnSuccessListener(result -> {
-                    FirebaseUser user = result.getUser();
-                    if (user == null) {
-                        sendAuthResult(false, "create", null, "تعذر إنشاء الحساب.");
-                        return;
-                    }
-                    UserProfileChangeRequest update = new UserProfileChangeRequest.Builder().setDisplayName(name).build();
-                    user.updateProfile(update).addOnCompleteListener(task -> {
-                        FirebaseUser refreshed = firebaseAuth.getCurrentUser();
-                        sendAuthResult(true, "create", refreshed != null ? refreshed : user, null);
-                    });
-                })
-                .addOnFailureListener(e -> sendAuthResult(false, "create", null, e.getLocalizedMessage())));
+            runOnUiThread(() -> {
+                ensureFirebaseAuth();
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(result -> {
+                        FirebaseUser user = result.getUser();
+                        if (user == null) {
+                            sendAuthResult(false, "create", null, "تعذر إنشاء الحساب.");
+                            return;
+                        }
+
+                        // Do not make the player wait for the cosmetic display-name write.
+                        // The web layer already has the chosen investigator name locally.
+                        sendAuthResult(true, "create", user, null);
+                        UserProfileChangeRequest update = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build();
+                        user.updateProfile(update);
+                    })
+                    .addOnFailureListener(e -> sendAuthResult(false, "create", null, e.getLocalizedMessage()));
+            });
         }
 
         @JavascriptInterface
         public void signInEmail(String email, String password) {
-            runOnUiThread(() -> firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(result -> sendAuthResult(true, "login", result.getUser(), null))
-                .addOnFailureListener(e -> sendAuthResult(false, "login", null, e.getLocalizedMessage())));
+            runOnUiThread(() -> {
+                ensureFirebaseAuth();
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(result -> sendAuthResult(true, "login", result.getUser(), null))
+                    .addOnFailureListener(e -> sendAuthResult(false, "login", null, e.getLocalizedMessage()));
+            });
         }
 
         @JavascriptInterface
         public void signInGoogle() {
             runOnUiThread(() -> {
+                ensureFirebaseAuth();
+                ensureCredentialManager();
                 GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
                     .setServerClientId(getString(R.string.default_web_client_id))
@@ -172,6 +204,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void signOut() {
             runOnUiThread(() -> {
+                ensureFirebaseAuth();
                 firebaseAuth.signOut();
                 sendAuthResult(true, "logout", null, null);
             });
@@ -179,8 +212,11 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void restoreSession() {
-            FirebaseUser user = firebaseAuth.getCurrentUser();
-            sendAuthResult(user != null, "restore", user, null);
+            runOnUiThread(() -> {
+                ensureFirebaseAuth();
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                sendAuthResult(user != null, "restore", user, null);
+            });
         }
     }
 
