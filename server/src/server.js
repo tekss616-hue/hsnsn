@@ -15,10 +15,7 @@ const roleConfig = JSON.parse(await readFile(rolePath, 'utf8'));
 const directorConfig = JSON.parse(await readFile(directorPath, 'utf8'));
 
 const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
-const provider = hasOpenAI
-  ? new OpenAIProvider()
-  : new MockProvider();
-
+const provider = hasOpenAI ? new OpenAIProvider() : new MockProvider();
 const providerName = hasOpenAI ? `openai:${process.env.OPENAI_MODEL || 'gpt-5.6-luna'}` : 'mock';
 const engine = new CaseEngine({ caseData, roleConfig, directorConfig, provider });
 const PORT = Number(process.env.PORT || 8787);
@@ -47,64 +44,40 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && req.url === '/api/health') {
       return send(res, 200, {
         ok: true,
-        brain: 'investigation-v0.4',
+        brain: 'investigation-v0.5',
         caseId: caseData.id,
         provider: providerName,
         liveAI: hasOpenAI,
         roleEngine: true,
         gameMaster: true,
+        liveDirector: true,
         stagedClues: directorConfig.clues?.length || 0,
+        timedAnnouncements: directorConfig.announcements?.length || 0,
         culpritModes: ['ai', 'human', 'random']
       });
     }
 
     if (req.method === 'POST' && req.url === '/api/session') {
       const body = await readJson(req);
-      const session = engine.createSession({
-        players: body.players || [],
-        culpritMode: body.culpritMode || 'ai'
-      });
+      const session = engine.createSession({ players: body.players || [], culpritMode: body.culpritMode || 'ai' });
       return send(res, 201, engine.getPublicSession(session.id));
     }
 
-    if (req.method === 'POST' && req.url === '/api/my-role') {
-      const body = await readJson(req);
-      return send(res, 200, engine.getPrivateRole(body));
-    }
-
-    if (req.method === 'POST' && req.url === '/api/round-state') {
-      const body = await readJson(req);
-      return send(res, 200, engine.getRoundState(body));
-    }
-
-    if (req.method === 'POST' && req.url === '/api/chat') {
-      const body = await readJson(req);
-      const result = await engine.ask(body);
-      return send(res, 200, result);
-    }
-
-    if (req.method === 'POST' && req.url === '/api/accuse') {
-      const body = await readJson(req);
-      const result = engine.accuse(body);
-      return send(res, 200, result);
-    }
-
-    if (req.method === 'POST' && req.url === '/api/finalize') {
-      const body = await readJson(req);
-      const result = engine.finalizeRound(body);
-      return send(res, 200, result);
-    }
+    if (req.method === 'POST' && req.url === '/api/my-role') return send(res, 200, engine.getPrivateRole(await readJson(req)));
+    if (req.method === 'POST' && req.url === '/api/round-state') return send(res, 200, engine.getRoundState(await readJson(req)));
+    if (req.method === 'POST' && req.url === '/api/game-master/feed') return send(res, 200, engine.getGameMasterFeed(await readJson(req)));
+    if (req.method === 'POST' && req.url === '/api/chat') return send(res, 200, await engine.ask(await readJson(req)));
+    if (req.method === 'POST' && req.url === '/api/accuse') return send(res, 200, engine.accuse(await readJson(req)));
+    if (req.method === 'POST' && req.url === '/api/contradiction') return send(res, 201, engine.recordContradiction(await readJson(req)));
+    if (req.method === 'POST' && req.url === '/api/finalize') return send(res, 200, engine.finalizeRound(await readJson(req)));
 
     return send(res, 404, { error: 'not_found' });
   } catch (error) {
     const code = String(error.message || error);
-    const status = code.includes('not_found')
-      ? 404
-      : code === 'time_expired'
-        ? 410
-        : code === 'round_still_active'
-          ? 409
-          : 400;
+    const status = code.includes('not_found') ? 404
+      : code === 'time_expired' ? 410
+      : code === 'round_still_active' ? 409
+      : 400;
     return send(res, status, { error: code });
   }
 });
