@@ -1,0 +1,33 @@
+{
+  "qualifyingFraction": 0.5,
+  "clues": [
+    {
+      "id": "clue-camera-box",
+      "type": "forensics",
+      "releaseAfterSeconds": 180,
+      "title": "فحص صندوق الكاميرا",
+      "text": "الفحص الأولي يشير إلى أن توقف كاميرا الممر لم يكن عطل كهرباء عاديًا؛ غطاء صندوق التحكم فُتح يدويًا."
+    },
+    {
+      "id": "clue-financial-records",
+      "type": "document",
+      "releaseAfterSeconds": 480,
+      "title": "سجل مالي مشبوه",
+      "text": "عُثر على تحويلات صغيرة متكررة وغير مبررة مرتبطة بحسابات الفندق خلال الأسابيع الماضية."
+    },
+    {
+      "id": "clue-service-access",
+      "type": "evidence",
+      "releaseAfterSeconds": 780,
+      "title": "وسيلة دخول خدمة",
+      "text": "باب مكتب المالك يقبل وسيلة دخول خدمة احتياطية، ما يفسر عدم وجود كسر أو اقتحام بالقوة."
+    },
+    {
+      "id": "clue-laundry-cart",
+      "type": "location",
+      "releaseAfterSeconds": 1080,
+      "title": "عربة المناشف",
+      "text": "عربة مناشف قرب غرفة الغسيل كانت خارج مكانها المعتاد في الفترة المحيطة بالحادث، ووجدت بين محتوياتها قطعة دخول بلاستيكية صغيرة."
+    }
+  ]
+}
