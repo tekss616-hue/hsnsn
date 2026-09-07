@@ -45,6 +45,9 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
+      - name: Print signing report
+        run: gradle signingReport
+
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace
 
