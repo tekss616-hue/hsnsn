@@ -40,6 +40,30 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Restore debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.config/.android/debug.keystore
+          key: veilmark-android-debug-keystore-v1
+
+      - name: Ensure stable debug signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYSTORE="$HOME/.config/.android/debug.keystore"
+          mkdir -p "$(dirname "$KEYSTORE")"
+          if [ ! -f "$KEYSTORE" ]; then
+            keytool -genkeypair -v \
+              -keystore "$KEYSTORE" \
+              -storepass android \
+              -alias AndroidDebugKey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
