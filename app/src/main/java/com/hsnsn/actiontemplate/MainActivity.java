@@ -3,7 +3,9 @@ package com.hsnsn.actiontemplate;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.graphics.Color;
+import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -12,18 +14,41 @@ import android.webkit.WebViewClient;
 import android.content.Intent;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
+
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserProfileChangeRequest;
+
+import org.json.JSONObject;
+
 public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private static final int FILE_CHOOSER_REQUEST = 1001;
+    private FirebaseAuth firebaseAuth;
+    private CredentialManager credentialManager;
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
         getWindow().setStatusBarColor(Color.BLACK);
         getWindow().setNavigationBarColor(Color.BLACK);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        credentialManager = CredentialManager.create(this);
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.BLACK);
@@ -38,6 +63,7 @@ public class MainActivity extends Activity {
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
+        webView.addJavascriptInterface(new AuthBridge(), "NativeAuth");
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -52,6 +78,110 @@ public class MainActivity extends Activity {
             }
         });
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void sendAuthResult(boolean ok, String action, FirebaseUser user, String message) {
+        try {
+            JSONObject payload = new JSONObject();
+            payload.put("ok", ok);
+            payload.put("action", action);
+            if (message != null) payload.put("message", message);
+            if (user != null) {
+                payload.put("uid", user.getUid());
+                payload.put("email", user.getEmail() == null ? "" : user.getEmail());
+                payload.put("name", user.getDisplayName() == null ? "" : user.getDisplayName());
+            }
+            final String js = "window.onNativeAuthResult&&window.onNativeAuthResult(" + payload.toString() + ")";
+            runOnUiThread(() -> webView.evaluateJavascript(js, null));
+        } catch (Exception ignored) { }
+    }
+
+    public class AuthBridge {
+        @JavascriptInterface
+        public void createAccount(String name, String email, String password) {
+            runOnUiThread(() -> firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(result -> {
+                    FirebaseUser user = result.getUser();
+                    if (user == null) {
+                        sendAuthResult(false, "create", null, "تعذر إنشاء الحساب.");
+                        return;
+                    }
+                    UserProfileChangeRequest update = new UserProfileChangeRequest.Builder().setDisplayName(name).build();
+                    user.updateProfile(update).addOnCompleteListener(task -> {
+                        FirebaseUser refreshed = firebaseAuth.getCurrentUser();
+                        sendAuthResult(true, "create", refreshed != null ? refreshed : user, null);
+                    });
+                })
+                .addOnFailureListener(e -> sendAuthResult(false, "create", null, e.getLocalizedMessage())));
+        }
+
+        @JavascriptInterface
+        public void signInEmail(String email, String password) {
+            runOnUiThread(() -> firebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener(result -> sendAuthResult(true, "login", result.getUser(), null))
+                .addOnFailureListener(e -> sendAuthResult(false, "login", null, e.getLocalizedMessage())));
+        }
+
+        @JavascriptInterface
+        public void signInGoogle() {
+            runOnUiThread(() -> {
+                GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(getString(R.string.default_web_client_id))
+                    .build();
+                GetCredentialRequest request = new GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build();
+                credentialManager.getCredentialAsync(
+                    MainActivity.this,
+                    request,
+                    new CancellationSignal(),
+                    getMainExecutor(),
+                    new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                        @Override
+                        public void onResult(GetCredentialResponse result) {
+                            if (!(result.getCredential() instanceof CustomCredential)) {
+                                sendAuthResult(false, "google", null, "تعذر قراءة بيانات حساب Google.");
+                                return;
+                            }
+                            CustomCredential credential = (CustomCredential) result.getCredential();
+                            if (!GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
+                                sendAuthResult(false, "google", null, "نوع اعتماد Google غير مدعوم.");
+                                return;
+                            }
+                            try {
+                                GoogleIdTokenCredential googleCredential = GoogleIdTokenCredential.createFrom(credential.getData());
+                                AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(googleCredential.getIdToken(), null);
+                                firebaseAuth.signInWithCredential(firebaseCredential)
+                                    .addOnSuccessListener(auth -> sendAuthResult(true, "google", auth.getUser(), null))
+                                    .addOnFailureListener(e -> sendAuthResult(false, "google", null, e.getLocalizedMessage()));
+                            } catch (Exception e) {
+                                sendAuthResult(false, "google", null, e.getLocalizedMessage());
+                            }
+                        }
+
+                        @Override
+                        public void onError(@NonNull GetCredentialException e) {
+                            sendAuthResult(false, "google", null, e.getLocalizedMessage());
+                        }
+                    }
+                );
+            });
+        }
+
+        @JavascriptInterface
+        public void signOut() {
+            runOnUiThread(() -> {
+                firebaseAuth.signOut();
+                sendAuthResult(true, "logout", null, null);
+            });
+        }
+
+        @JavascriptInterface
+        public void restoreSession() {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            sendAuthResult(user != null, "restore", user, null);
+        }
     }
 
     @Override
