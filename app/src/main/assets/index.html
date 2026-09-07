@@ -11,58 +11,79 @@
 <body>
   <main id="intro" class="intro" aria-label="مقدمة اللعبة">
     <button id="skipIntro" class="skip">تخطي</button>
-    <div class="rain"></div><div class="grain"></div><div class="police-glow red"></div><div class="police-glow blue"></div>
+    <div class="cinematic-vignette"></div>
+    <div class="rain-overlay"></div>
+    <div class="police-glow red"></div>
+    <div class="police-glow blue"></div>
 
-    <section class="scene scene-hotel">
-      <div class="moon"></div><div class="hotel"><div class="hotel-sign">MIDNIGHT HOTEL</div><div class="windows"></div><div class="door"></div></div>
-      <div class="street-reflection"></div>
+    <section class="scene scene-1 active" data-scene="1">
+      <picture class="scene-picture">
+        <source media="(orientation: portrait)" srcset="media/hotel-portrait.png" />
+        <img src="media/hotel-landscape.png" alt="فندق Wren في ليلة ممطرة" />
+      </picture>
     </section>
 
-    <section class="scene scene-corridor">
-      <div class="corridor-lines"></div><div class="crime-tape">RESTRICTED • INVESTIGATION • RESTRICTED</div>
-      <div class="evidence-card"><span>01</span><strong>00:04</strong><small>صوت ارتطام في الممر</small></div>
+    <section class="scene scene-2" data-scene="2">
+      <picture class="scene-picture">
+        <source media="(orientation: portrait)" srcset="media/corridor-portrait.png" />
+        <img src="media/corridor-landscape.png" alt="ممر فندق غامض" />
+      </picture>
     </section>
 
-    <section class="scene scene-files">
-      <div class="case-label">CONFIDENTIAL / CASE FILE</div>
-      <div class="suspects">
-        <article><div class="silhouette"></div><b>SUSPECT 01</b><i>?</i></article>
-        <article><div class="silhouette"></div><b>SUSPECT 02</b><i>?</i></article>
-        <article><div class="silhouette"></div><b>SUSPECT 03</b><i>?</i></article>
+    <section class="scene scene-3" data-scene="3">
+      <picture class="scene-picture">
+        <source media="(orientation: portrait)" srcset="media/crime-portrait.png" />
+        <img src="media/crime-landscape.png" alt="مسرح تحقيق داخل غرفة الفندق" />
+      </picture>
+    </section>
+
+    <section class="scene scene-4" data-scene="4">
+      <picture class="scene-picture">
+        <source media="(orientation: portrait)" srcset="media/desk-portrait.png" />
+        <img src="media/desk-landscape.png" alt="طاولة ملفات ومشتبه بهم" />
+      </picture>
+    </section>
+
+    <section class="scene scene-title" data-scene="5">
+      <div class="final-copy" dir="ltr">
+        <span>CONFIDENTIAL // INVESTIGATION DIVISION</span>
+        <h1>EVERYONE HAS A STORY.</h1>
+        <h2>SOMEONE IS LYING.</h2>
+        <div class="pulse-line"></div>
       </div>
-      <div class="evidence-strip"><span>CAM 03</span><span>ACCESS LOG</span><span>00:07 LOST</span></div>
-    </section>
-
-    <section class="scene scene-title">
-      <div class="final-copy"><span>CASE FILE // OPEN</span><h1>EVERYONE HAS A STORY.</h1><h2>SOMEONE IS LYING.</h2><div class="pulse-line"></div></div>
     </section>
   </main>
 
   <main id="envelopeScreen" class="envelope-screen" hidden>
     <div class="desk-light"></div>
     <div class="envelope-copy"><span>PRIVATE DELIVERY</span><h1>لديك رسالة سرية</h1><p>اضغط على الظرف لفتح ملفك.</p></div>
-    <button id="envelope" class="envelope" aria-label="فتح الظرف">
-      <span class="envelope-back"></span>
-      <span class="letter"><b>INVESTIGATOR ACCESS</b><small>CONFIDENTIAL</small><i>CASE DIVISION</i></span>
-      <span class="flap"></span>
-      <span class="envelope-front"></span>
-      <span class="wax"><em>V</em></span>
+    <button id="envelope" class="image-envelope" aria-label="فتح الظرف">
+      <img class="envelope-closed" src="media/envelope-closed.png" alt="ظرف أسود مغلق" />
+      <img class="envelope-open" src="media/envelope-open.png" alt="ظرف أسود مفتوح" />
     </button>
   </main>
 
   <main id="profile" class="profile" hidden>
-    <div class="profile-card">
-      <div class="paper-pin"></div><span class="stamp">INVESTIGATOR FILE / CONFIDENTIAL</span>
-      <h1>إنشاء هوية المحقق</h1><p>أدخل بياناتك لاعتماد هويتك داخل القضايا وغرف التحقيق.</p>
-      <label>اسم المحقق<input id="playerName" autocomplete="username" maxlength="24" placeholder="الاسم الذي سيراه اللاعبون"></label>
-      <label>البريد الإلكتروني<input id="playerEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
-      <label>كلمة المرور<input id="playerPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 أحرف على الأقل"></label>
-      <label>تأكيد كلمة المرور<input id="playerPasswordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="أعد كتابة كلمة المرور"></label>
-      <div id="formError" class="form-error" role="alert"></div>
-      <button id="createProfile" class="primary">اعتماد هويتي</button>
-      <button id="existingAccount" class="existing">لدي هوية بالفعل — تسجيل الدخول</button>
+    <div class="identity-paper">
+      <img class="identity-paper-bg" src="media/investigator-paper.png" alt="ورقة هوية المحقق" />
+      <div class="identity-form">
+        <h1>إنشاء هوية المحقق</h1>
+        <p>بياناتك الخاصة لا تظهر للاعبين. اسم المحقق فقط هو الذي يظهر داخل القضايا.</p>
+        <label>اسم المحقق<input id="playerName" autocomplete="username" maxlength="24" placeholder="الاسم الذي سيراه اللاعبون"></label>
+        <label>البريد الإلكتروني<input id="playerEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
+        <label>كلمة المرور<input id="playerPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 أحرف على الأقل"></label>
+        <label>تأكيد كلمة المرور<input id="playerPasswordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="أعد كتابة كلمة المرور"></label>
+        <div id="formError" class="form-error" role="alert"></div>
+        <button id="createProfile" class="primary">اعتماد هويتي</button>
+        <button id="existingAccount" class="existing">لدي هوية بالفعل — تسجيل الدخول</button>
+      </div>
     </div>
   </main>
+
+  <audio id="rainAudio" src="media/rain.wav" preload="auto" loop></audio>
+  <audio id="impactAudio" src="media/impact.wav" preload="auto"></audio>
+  <audio id="policeAudio" src="media/police.mp3" preload="auto"></audio>
+  <audio id="boomAudio" src="media/boom.mp3" preload="auto"></audio>
   <script src="app.js"></script>
 </body>
 </html>
