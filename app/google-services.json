@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "228318611339",
+    "project_id": "veilmark-d2480",
+    "storage_bucket": "veilmark-d2480.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228318611339:android:a9038d0786753b7674518e",
+        "android_client_info": {
+          "package_name": "com.hsnsn.actiontemplate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "228318611339-758807hv2h4ke9s475o5cg1gknacavmv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hsnsn.actiontemplate",
+            "certificate_hash": "9046f2df60caaa4a820fdc600606461a31818514"
+          }
+        },
+        {
+          "client_id": "228318611339-aehctm7ggfreblqfpddd8efglgh87rtt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAObDsvcxfy7qyHWYRXlmsXlbTu554fcQc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "228318611339-aehctm7ggfreblqfpddd8efglgh87rtt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
