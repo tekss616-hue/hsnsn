@@ -8,7 +8,9 @@ import { OpenAIProvider } from './providers/openai-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const casePath = path.resolve(__dirname, '../cases/midnight-hotel.json');
+const rolePath = path.resolve(__dirname, '../cases/midnight-hotel-player-roles.json');
 const caseData = JSON.parse(await readFile(casePath, 'utf8'));
+const roleConfig = JSON.parse(await readFile(rolePath, 'utf8'));
 
 const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 const provider = hasOpenAI
@@ -16,7 +18,7 @@ const provider = hasOpenAI
   : new MockProvider();
 
 const providerName = hasOpenAI ? `openai:${process.env.OPENAI_MODEL || 'gpt-5.6-luna'}` : 'mock';
-const engine = new CaseEngine({ caseData, provider });
+const engine = new CaseEngine({ caseData, roleConfig, provider });
 const PORT = Number(process.env.PORT || 8787);
 
 function send(res, status, body) {
@@ -43,17 +45,27 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && req.url === '/api/health') {
       return send(res, 200, {
         ok: true,
-        brain: 'investigation-v0.2',
+        brain: 'investigation-v0.3',
         caseId: caseData.id,
         provider: providerName,
-        liveAI: hasOpenAI
+        liveAI: hasOpenAI,
+        roleEngine: true,
+        culpritModes: ['ai', 'human', 'random']
       });
     }
 
     if (req.method === 'POST' && req.url === '/api/session') {
       const body = await readJson(req);
-      const session = engine.createSession({ players: body.players || [] });
+      const session = engine.createSession({
+        players: body.players || [],
+        culpritMode: body.culpritMode || 'ai'
+      });
       return send(res, 201, engine.getPublicSession(session.id));
+    }
+
+    if (req.method === 'POST' && req.url === '/api/my-role') {
+      const body = await readJson(req);
+      return send(res, 200, engine.getPrivateRole(body));
     }
 
     if (req.method === 'POST' && req.url === '/api/chat') {
