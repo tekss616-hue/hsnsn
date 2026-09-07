@@ -1,83 +1,18 @@
-const intro=document.getElementById('intro');
-const introVideo=document.getElementById('introVideo');
-const resumeIntro=document.getElementById('resumeIntro');
-const envelopeScreen=document.getElementById('envelopeScreen');
-const envelope=document.getElementById('envelope');
-const profile=document.getElementById('profile');
-const skip=document.getElementById('skipIntro');
-const formError=document.getElementById('formError');
-let finished=false,envelopeOpened=false;
-
-function showEnvelope(){
-  if(finished)return;
-  finished=true;
-  try{introVideo.pause()}catch(e){}
-  intro.classList.add('intro-exit');
-  setTimeout(()=>{
-    intro.hidden=true;
-    envelopeScreen.hidden=false;
-    document.body.style.overflow='hidden';
-  },500);
-}
-
-function tryStartIntro(){
-  if(!introVideo)return;
-  introVideo.currentTime=0;
-  introVideo.muted=false;
-  introVideo.volume=1;
-  const p=introVideo.play();
-  if(p?.then){
-    p.then(()=>{resumeIntro.hidden=true}).catch(()=>{resumeIntro.hidden=false});
-  }
-}
-
-function fitIntroVideo(){
-  if(!introVideo)return;
-  const vw=window.innerWidth||document.documentElement.clientWidth;
-  const vh=window.innerHeight||document.documentElement.clientHeight;
-  const ratio=vw/Math.max(1,vh);
-  intro.dataset.screenRatio=ratio.toFixed(3);
-  intro.classList.toggle('very-tall',ratio<0.50);
-  intro.classList.toggle('wide-portrait',ratio>0.59&&ratio<1);
-}
-
-function paperFoley(type='place'){
-  try{
-    const ctx=paperFoley.ctx||(paperFoley.ctx=new (window.AudioContext||window.webkitAudioContext)());
-    const len=type==='open'?.42:.22,buffer=ctx.createBuffer(1,ctx.sampleRate*len,ctx.sampleRate),data=buffer.getChannelData(0);
-    for(let i=0;i<data.length;i++){const t=i/data.length;const env=Math.pow(1-t,type==='open'?1.7:3.2);data[i]=(Math.random()*2-1)*env}
-    const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();src.buffer=buffer;filter.type='bandpass';filter.frequency.value=type==='open'?1800:900;filter.Q.value=.7;gain.gain.value=type==='open'?.17:.23;src.connect(filter).connect(gain).connect(ctx.destination);src.start();
-  }catch(e){}
-}
-
-function openEnvelope(){
-  if(envelopeOpened)return;envelopeOpened=true;paperFoley('place');envelope.classList.add('opening');
-  setTimeout(()=>paperFoley('open'),260);
-  setTimeout(()=>envelope.classList.add('depart'),1450);
-  setTimeout(()=>{envelopeScreen.style.transition='opacity .5s ease';envelopeScreen.style.opacity='0'},1700);
-  setTimeout(()=>{envelopeScreen.hidden=true;profile.hidden=false;document.body.style.overflow='auto';requestAnimationFrame(()=>document.getElementById('playerName')?.focus())},2200);
-}
-
-introVideo.addEventListener('ended',showEnvelope);
-introVideo.addEventListener('error',()=>{resumeIntro.hidden=false;resumeIntro.textContent='تعذر تشغيل المقدمة — اضغط للمتابعة';resumeIntro.onclick=showEnvelope});
-introVideo.addEventListener('playing',()=>{resumeIntro.hidden=true});
-resumeIntro.addEventListener('click',tryStartIntro);
-skip.addEventListener('click',showEnvelope);
-envelope.addEventListener('click',openEnvelope);
-window.addEventListener('resize',fitIntroVideo,{passive:true});
-window.addEventListener('orientationchange',()=>setTimeout(fitIntroVideo,120),{passive:true});
-fitIntroVideo();
-tryStartIntro();
-
-document.getElementById('createProfile').addEventListener('click',()=>{
-  const name=document.getElementById('playerName').value.trim();
-  const email=document.getElementById('playerEmail').value.trim();
-  const password=document.getElementById('playerPassword').value;
-  const confirm=document.getElementById('playerPasswordConfirm').value;
-  formError.textContent='';
-  if(name.length<2){formError.textContent='اكتب اسم محقق من حرفين على الأقل.';document.getElementById('playerName').focus();return}
-  if(!/^\S+@\S+\.\S+$/.test(email)){formError.textContent='تأكد من كتابة البريد الإلكتروني بشكل صحيح.';document.getElementById('playerEmail').focus();return}
-  if(password.length<8){formError.textContent='كلمة المرور يجب أن تكون 8 أحرف على الأقل.';document.getElementById('playerPassword').focus();return}
-  if(password!==confirm){formError.textContent='كلمتا المرور غير متطابقتين.';document.getElementById('playerPasswordConfirm').focus();return}
-  const btn=document.getElementById('createProfile');btn.textContent=`IDENTITY VERIFIED — ${name}`;btn.disabled=true;formError.textContent='تم اعتماد الهوية محليًا للمعاينة. ربط الحساب بالسيرفر سيكون في مرحلة الحسابات.';
-});
+const $=id=>document.getElementById(id);const intro=$('intro'),video=$('introVideo'),resume=$('resumeIntro'),envelopeScreen=$('envelopeScreen'),envelope=$('envelope'),profile=$('profile'),hq=$('hq'),error=$('formError'),splash=$('quickSplash');let finished=false,opened=false;
+const store={get:(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const cases={free:[['الغرفة 317','جريمة غامضة'],['آخر اتصال','اختفاء'],['الشاهد الصامت','سرقة'],['الرسالة السوداء','ابتزاز'],['الممر الأخير','اختفاء'],['الملف المحذوف','تجسس']],premium:[['الهوية المزدوجة','انتحال'],['خيانة منتصف الليل','خيانة'],['الدائرة المغلقة','جريمة غامضة'],['العميل السابع','تجسس'],['الصوت المفقود','اختفاء'],['النسخة الأخيرة','سرقة']]};
+function renderCases(){['free','premium'].forEach(t=>{const el=$(t+'Cases');el.innerHTML=cases[t].map((c,i)=>`<button class="case-card" data-case="${t}-${i}"><b>${c[0]}</b><small>${c[1]} · ${t==='free'?'6':'10'} لاعبين</small></button>`).join('')})}
+function chooseHQ(){const r=innerHeight/Math.max(1,innerWidth),opts=[[16/9,'hq-9x16.png'],[18/9,'hq-9x18.png'],[19.5/9,'hq-9x19_5.png'],[20/9,'hq-9x20.png'],[21/9,'hq-9x21.png']];return opts.reduce((a,b)=>Math.abs(b[0]-r)<Math.abs(a[0]-r)?b:a)[1]}
+function preloadHQ(){const src='hq/'+chooseHQ();const im=new Image();im.src=src;$('hqBackground').src=src}
+function hideAll(){[intro,envelopeScreen,profile,hq,splash].forEach(x=>x&&(x.hidden=true))}
+function showHQ(name){hideAll();hq.hidden=false;$('hqName').textContent=name||store.get('investigator_name','المحقق');preloadHQ();renderCases()}
+function showEnvelope(){if(finished)return;finished=true;try{video.pause()}catch{};store.set('intro_seen',true);intro.classList.add('intro-exit');setTimeout(()=>{intro.hidden=true;envelopeScreen.hidden=false},420)}
+function startIntro(force=false){finished=false;intro.classList.remove('intro-exit');hideAll();intro.hidden=false;if(force)store.set('intro_seen',false);try{video.currentTime=0;video.muted=false;video.volume=1;const p=video.play();p?.catch(()=>resume.hidden=false)}catch{resume.hidden=false}}
+function openEnvelope(){if(opened)return;opened=true;envelope.classList.add('opening');setTimeout(()=>envelope.classList.add('depart'),1200);setTimeout(()=>{envelopeScreen.hidden=true;profile.hidden=false},1800)}
+function boot(){preloadHQ();const name=store.get('investigator_name');if(store.get('intro_seen',false)){hideAll();splash.hidden=false;setTimeout(()=>name?showHQ(name):(splash.hidden=true,profile.hidden=false),1250)}else startIntro()}
+video.addEventListener('ended',showEnvelope);video.addEventListener('error',()=>{resume.hidden=false;resume.textContent='تعذر تشغيل المقدمة — اضغط للمتابعة';resume.onclick=showEnvelope});video.addEventListener('playing',()=>resume.hidden=true);$('skipIntro').onclick=showEnvelope;resume.onclick=()=>video.play();envelope.onclick=openEnvelope;
+$('createProfile').onclick=()=>{const name=$('playerName').value.trim(),email=$('playerEmail').value.trim(),p=$('playerPassword').value,c=$('playerPasswordConfirm').value;error.textContent='';if(name.length<2)return error.textContent='اكتب اسم محقق من حرفين على الأقل.';if(!/^\S+@\S+\.\S+$/.test(email))return error.textContent='تأكد من البريد الإلكتروني.';if(p.length<8)return error.textContent='كلمة المرور يجب أن تكون 8 أحرف على الأقل.';if(p!==c)return error.textContent='كلمتا المرور غير متطابقتين.';store.set('investigator_name',name);store.set('profile_cache',{name,email});showHQ(name)};
+$('googleAuth').onclick=()=>{error.textContent='زر Google جاهز في الواجهة، ويحتاج Client ID / إعداد مزود الهوية لتفعيل تسجيل Google الحقيقي.'};
+$('existingAccount').onclick=()=>{error.textContent='واجهة تسجيل الدخول ستستخدم نفس مزود الحسابات عند ربط الخادم.'};
+$('hqSettings').onclick=()=>$('settingsSheet').hidden=false;$('closeSettings').onclick=()=>$('settingsSheet').hidden=true;$('replayIntro').onclick=()=>{$('settingsSheet').hidden=true;opened=false;startIntro(true)};
+window.addEventListener('resize',()=>{if(!hq.hidden)preloadHQ()},{passive:true});document.addEventListener('click',e=>{const c=e.target.closest?.('.case-card');if(c){store.set('last_case',c.dataset.case);c.animate([{transform:'scale(.98)'},{transform:'scale(1)'}],{duration:140})}});boot();
