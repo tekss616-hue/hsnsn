@@ -13,10 +13,7 @@
     <div class="rain"></div><div class="grain"></div><div class="police-glow red"></div><div class="police-glow blue"></div>
 
     <section class="scene scene-hotel">
-      <div class="moon"></div><div class="hotel">
-        <div class="hotel-sign">MIDNIGHT HOTEL</div>
-        <div class="windows"></div><div class="door"></div>
-      </div>
+      <div class="moon"></div><div class="hotel"><div class="hotel-sign">MIDNIGHT HOTEL</div><div class="windows"></div><div class="door"></div></div>
       <div class="street-reflection"></div>
     </section>
 
@@ -40,11 +37,29 @@
     </section>
   </main>
 
+  <main id="envelopeScreen" class="envelope-screen" hidden>
+    <div class="desk-light"></div>
+    <div class="envelope-copy"><span>PRIVATE DELIVERY</span><h1>لديك رسالة سرية</h1><p>اضغط على الظرف لفتح ملفك.</p></div>
+    <button id="envelope" class="envelope" aria-label="فتح الظرف">
+      <span class="envelope-back"></span>
+      <span class="letter"><b>INVESTIGATOR ACCESS</b><small>CONFIDENTIAL</small><i>CASE DIVISION</i></span>
+      <span class="flap"></span>
+      <span class="envelope-front"></span>
+      <span class="wax"><em>V</em></span>
+    </button>
+  </main>
+
   <main id="profile" class="profile" hidden>
-    <div class="profile-card"><span class="stamp">INVESTIGATOR FILE</span><h1>أنشئ ملف المحقق</h1><p>هذه هويتك داخل القضايا وغرف التحقيق.</p>
-      <label>اسم المحقق<input id="playerName" autocomplete="name" placeholder="اكتب اسمك"></label>
+    <div class="profile-card">
+      <div class="paper-pin"></div><span class="stamp">INVESTIGATOR FILE / CONFIDENTIAL</span>
+      <h1>إنشاء هوية المحقق</h1><p>أدخل بياناتك لاعتماد هويتك داخل القضايا وغرف التحقيق.</p>
+      <label>اسم المحقق<input id="playerName" autocomplete="username" maxlength="24" placeholder="الاسم الذي سيراه اللاعبون"></label>
       <label>البريد الإلكتروني<input id="playerEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
-      <button id="createProfile" class="primary">ابدأ التحقيق</button><button class="existing">لدي حساب بالفعل</button>
+      <label>كلمة المرور<input id="playerPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 أحرف على الأقل"></label>
+      <label>تأكيد كلمة المرور<input id="playerPasswordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="أعد كتابة كلمة المرور"></label>
+      <div id="formError" class="form-error" role="alert"></div>
+      <button id="createProfile" class="primary">اعتماد هويتي</button>
+      <button id="existingAccount" class="existing">لدي هوية بالفعل — تسجيل الدخول</button>
     </div>
   </main>
   <script src="app.js"></script>
