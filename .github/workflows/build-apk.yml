@@ -16,7 +16,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p app/src/main/assets/media
+          mkdir -p app/src/main/assets/media app/src/main/assets/hq
           mv "app/src/main/res/values/wren-hotel-intro-landscape.png" app/src/main/assets/media/hotel-landscape.png
           mv "app/src/main/res/values/wren-hotel-intro-portrait.png" app/src/main/assets/media/hotel-portrait.png
           mv "app/src/main/res/values/wren-hotel-corridor-landscape.png" app/src/main/assets/media/corridor-landscape.png
@@ -32,6 +32,7 @@ jobs:
           mv "app/src/main/res/values/muffled-impact-single.wav" app/src/main/assets/media/impact.wav
           mv "app/src/main/res/values/Police Siren (Distant) - Sound Effect _ ProSounds.mp3" app/src/main/assets/media/police.mp3
           mv "app/src/main/res/values/Cinematic Boom - sound effect - [High quality].mp3" app/src/main/assets/media/boom.mp3
+          unzip -o app/src/main/assets/investigator-hq-responsive-pack.zip -d app/src/main/assets/hq
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
