@@ -23,6 +23,16 @@ if 'checkForAppUpdate).start()' not in java:
 method_anchor = '    private void ensureFirebaseAuth()'
 methods = r'''    private static final String LATEST_RELEASE_API = "https://api.github.com/repos/tekss616-hue/hsnsn/releases/latest";
 
+    private int getInstalledVersionCode() {
+        try {
+            android.content.pm.PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) return (int) info.getLongVersionCode();
+            return info.versionCode;
+        } catch (Exception ignored) {
+            return 0;
+        }
+    }
+
     private void checkForAppUpdate() {
         java.net.HttpURLConnection connection = null;
         try {
@@ -44,7 +54,7 @@ methods = r'''    private static final String LATEST_RELEASE_API = "https://api.
             java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(\\d+)").matcher(tag);
             if (!matcher.find()) return;
             int latestCode = Integer.parseInt(matcher.group(1));
-            if (latestCode <= BuildConfig.VERSION_CODE) return;
+            if (latestCode <= getInstalledVersionCode()) return;
             JSONArray assets = release.optJSONArray("assets");
             if (assets == null) return;
             String apkUrl = "";
@@ -124,17 +134,13 @@ methods = r'''    private static final String LATEST_RELEASE_API = "https://api.
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (pendingUpdateUrl != null && !pendingUpdateUrl.isEmpty() && !updateDownloadStarted) {
-            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O || getPackageManager().canRequestPackageInstalls()) {
-                String url = pendingUpdateUrl;
-                int code = pendingUpdateVersion;
-                pendingUpdateUrl = null;
-                beginUpdateDownload(code, url);
-            }
-        }
+    private void resumePendingUpdate() {
+        if (pendingUpdateUrl == null || pendingUpdateUrl.isEmpty() || updateDownloadStarted) return;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && !getPackageManager().canRequestPackageInstalls()) return;
+        String url = pendingUpdateUrl;
+        int code = pendingUpdateVersion;
+        pendingUpdateUrl = null;
+        beginUpdateDownload(code, url);
     }
 
 '''
@@ -142,6 +148,13 @@ if 'LATEST_RELEASE_API = "https://api.github.com/repos/tekss616-hue/hsnsn/releas
     if method_anchor not in java:
         raise SystemExit('Updater method anchor not found')
     java = java.replace(method_anchor, methods + method_anchor, 1)
+
+# Reuse the app's existing onResume instead of adding a second override.
+if 'resumePendingUpdate();' not in java:
+    resume_anchor = 'super.onResume();'
+    if resume_anchor not in java:
+        raise SystemExit('Existing onResume anchor not found')
+    java = java.replace(resume_anchor, resume_anchor + ' resumePendingUpdate();', 1)
 
 permission = '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n'
 if 'android.permission.REQUEST_INSTALL_PACKAGES' not in manifest:
