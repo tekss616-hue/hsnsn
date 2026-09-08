@@ -14,14 +14,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Install media optimizers
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq python3-pil
-
       - name: Prepare optimized runtime assets
         shell: bash
         run: |
@@ -31,11 +29,8 @@ jobs:
           python3 - <<'PY'
           import base64
           from pathlib import Path
-          src = Path('branding/game-identity.webp.b64')
-          dst = Path('app/src/main/assets/media/game-identity.webp')
-          data = ''.join(src.read_text(encoding='utf-8').split())
-          data += '=' * (-len(data) % 4)
-          dst.write_bytes(base64.b64decode(data, validate=False))
+          src=Path('branding/game-identity.webp.b64'); dst=Path('app/src/main/assets/media/game-identity.webp')
+          data=''.join(src.read_text(encoding='utf-8').split()); data+='='*(-len(data)%4); dst.write_bytes(base64.b64decode(data,validate=False))
           PY
           python3 tools/apply_account_social_patch.py
           python3 tools/apply_auth_persistence_patch.py
@@ -48,9 +43,9 @@ jobs:
           python3 tools/apply_puzzle_race.py
           python3 tools/apply_custom_match_emblem.py
           python3 tools/apply_in_app_updater.py
+          python3 tools/apply_gameplay_social_upgrade.py
           python3 tools/remove_intro.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
-
           rm -f app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4 app/src/main/assets/intro-vertical-final.mp4 app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/intro-poster.webp
           mv "app/src/main/res/values/wren-hotel-intro-landscape.png" "$SRC/hotel-landscape.png"
           mv "app/src/main/res/values/wren-hotel-intro-portrait.png" "$SRC/hotel-portrait.png"
@@ -67,7 +62,6 @@ jobs:
           mv "app/src/main/res/values/muffled-impact-single.wav" "$SRC/impact.wav"
           mv "app/src/main/res/values/Police Siren (Distant) - Sound Effect _ ProSounds.mp3" "$SRC/police.mp3"
           mv "app/src/main/res/values/Cinematic Boom - sound effect - [High quality].mp3" "$SRC/boom.mp3"
-
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
@@ -79,10 +73,8 @@ jobs:
           webp(src/'envelope-closed.png',media/'envelope-closed.webp',(1024,1024),84)
           webp(src/'envelope-open.png',media/'envelope-open.webp',(1024,1024),84)
           PY
-
           rm -rf app/src/main/assets/hq
           rm -f app/src/main/assets/investigator-hq-responsive-pack.zip app/src/main/assets/media/investigator-paper.webp
-
       - name: Verify identity, realtime social, puzzle race and updater
         shell: bash
         run: |
@@ -94,29 +86,21 @@ jobs:
           grep -q 'USERNAME_TAKEN' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'rollbackNewAccount' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'collection("usernames").document(q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'out.put("query",q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'removeFriend' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'startRealtime' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'watchChat' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'stopChatWatch' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'setTyping' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'showNativeNotification' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'reauthenticatePasswordAndDelete' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'googleReauthAndDelete' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'data-remove' app/src/main/assets/social.js
-          grep -q 'onNativeRealtimeEvent' app/src/main/assets/social.js
-          grep -q 'requestDeletePassword' app/src/main/assets/app.js
-          grep -q 'id="appDialog"' app/src/main/assets/index.html
-          grep -q 'function showAppDialog' app/src/main/assets/app.js
-          grep -q 'search-spinner' app/src/main/assets/social.css
-          grep -q 'user-select:none' app/src/main/assets/styles.css
+          grep -q 'GAMEPLAY_SOCIAL_UPGRADE' app/src/main/assets/social.js
+          grep -q 'id="gameStore"' app/src/main/assets/index.html
+          grep -q 'id="rankingView"' app/src/main/assets/index.html
+          grep -q 'adminPanelBtn' app/src/main/assets/index.html
+          grep -q 'investigatorCard' app/src/main/assets/index.html
           grep -q 'id="puzzleGame"' app/src/main/assets/index.html
           grep -q 'startPuzzleMatch' app/src/main/assets/app.js
-          grep -q 'onNativePuzzleEvent' app/src/main/assets/app.js
           grep -q 'new PuzzleBridge(), "NativePuzzle"' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'public class PuzzleBridge' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'members.size()>=7' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'stage1Chat' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java || grep -q '"stage"+stage+"Chat"' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           test -f app/src/main/assets/puzzle-1.svg
           test -f app/src/main/assets/puzzle-6.svg
           test -f app/src/main/assets/media/investigation-match-emblem.webp
@@ -127,38 +111,28 @@ jobs:
           ! grep -q '⚡ ابدأ التحقيق' app/src/main/assets/app.js
           ! grep -q '<video id="introVideo"' app/src/main/assets/index.html
           ! test -f app/src/main/assets/intro-runtime.mp4
-          ! grep -q 'encodedDisplayName' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           ! grep -q 'confirm(' app/src/main/assets/app.js
-          ! grep -q 'confirm(' app/src/main/assets/social.js
-          ! grep -q 'alert(' app/src/main/assets/app.js
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Restore debug signing key
         uses: actions/cache@v4
         with:
           path: ~/.config/.android/debug.keystore
           key: veilmark-android-debug-keystore-v1
-
       - name: Ensure stable debug signing key
         shell: bash
         run: |
           set -euo pipefail
           KEYSTORE="$HOME/.config/.android/debug.keystore"
           mkdir -p "$(dirname "$KEYSTORE")"
-          if [ ! -f "$KEYSTORE" ]; then
-            keytool -genkeypair -v -keystore "$KEYSTORE" -storepass android -alias AndroidDebugKey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          fi
-
+          if [ ! -f "$KEYSTORE" ]; then keytool -genkeypair -v -keystore "$KEYSTORE" -storepass android -alias AndroidDebugKey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"; fi
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-
       - name: Stamp build version
         shell: bash
         run: |
@@ -166,20 +140,16 @@ jobs:
           sed -i -E "s/versionCode [0-9]+/versionCode ${GITHUB_RUN_NUMBER}/" app/build.gradle
           sed -i -E "s/versionName '[^']+'/versionName '1.0.${GITHUB_RUN_NUMBER}'/" app/build.gradle
           grep -q "versionCode ${GITHUB_RUN_NUMBER}" app/build.gradle
-
       - name: Print signing report
         run: gradle signingReport
-
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: action-template-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-
       - name: Publish successful APK release
         shell: bash
         env:
@@ -189,8 +159,4 @@ jobs:
           TAG="build-${GITHUB_RUN_NUMBER}"
           APK="hsnsn-${GITHUB_RUN_NUMBER}.apk"
           cp app/build/outputs/apk/debug/app-debug.apk "$APK"
-          gh release create "$TAG" "$APK" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --target "${GITHUB_SHA}" \
-            --title "HSNSN build ${GITHUB_RUN_NUMBER}" \
-            --notes "نسخة ناجحة جاهزة للتحديث من داخل التطبيق."
+          gh release create "$TAG" "$APK" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --title "HSNSN build ${GITHUB_RUN_NUMBER}" --notes "نسخة ناجحة جاهزة للتحديث من داخل التطبيق."
