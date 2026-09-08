@@ -23,4 +23,12 @@ replacement=r'''        @JavascriptInterface public void watchChat(String peerUi
 '''
 s=s[:start]+replacement+s[end:]
 p.write_text(s)
-print('Fixed realtime chat watch lifecycle')
+
+# Android 13+ system notifications require a manifest declaration as well as runtime consent.
+p=Path('app/src/main/AndroidManifest.xml')
+s=p.read_text()
+if 'android.permission.POST_NOTIFICATIONS' not in s:
+    pos=s.find('>')+1
+    s=s[:pos]+'\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />'+s[pos:]
+p.write_text(s)
+print('Fixed realtime chat watch lifecycle and notification permission')
