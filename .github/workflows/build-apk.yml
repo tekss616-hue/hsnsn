@@ -38,6 +38,7 @@ jobs:
           python3 tools/apply_auth_persistence_patch.py
           python3 tools/apply_search_response_query.py
           python3 tools/apply_native_app_polish.py
+          python3 tools/apply_legacy_username_conflict_ui.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
@@ -89,6 +90,7 @@ jobs:
           grep -q 'out.put("query",q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'id="appDialog"' app/src/main/assets/index.html
           grep -q 'function showAppDialog' app/src/main/assets/app.js
+          grep -q 'اسم المستخدم الحالي مستخدم بحساب آخر' app/src/main/assets/app.js
           grep -q 'search-spinner' app/src/main/assets/social.css
           grep -q 'user-select:none' app/src/main/assets/styles.css
           ! grep -q 'confirm(' app/src/main/assets/app.js
