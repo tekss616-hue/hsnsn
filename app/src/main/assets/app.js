@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id);
 const intro=$('intro'),video=$('introVideo'),resume=$('resumeIntro'),envelopeScreen=$('envelopeScreen'),envelope=$('envelope'),profile=$('profile'),hq=$('hq'),error=$('formError'),splash=$('quickSplash');
-let finished=false,opened=false,authMode='create',authBusy=false,hqLoaded='',pendingGoogleProfile=null;
+let finished=false,opened=false,authMode='create',authBusy=false,pendingGoogleProfile=null;
 window.VEILMARK_PERF={bootStart:performance.now()};
 
 const store={
@@ -23,35 +23,11 @@ function renderCases(){
   });
 }
 
-function chooseHQ(){
-  const r=innerHeight/Math.max(1,innerWidth);
-  const opts=[[16/9,'hq-9x16.webp'],[18/9,'hq-9x18.webp'],[19.5/9,'hq-9x19_5.webp'],[20/9,'hq-9x20.webp'],[21/9,'hq-9x21.webp']];
-  return opts.reduce((a,b)=>Math.abs(b[0]-r)<Math.abs(a[0]-r)?b:a)[1];
-}
-
-function loadHQ(){
-  const src='hq/'+chooseHQ();
-  if(hqLoaded===src)return;
-  hqLoaded=src;
-  const bg=$('hqBackground');
-  bg.classList.remove('ready');
-  const im=new Image();
-  im.decoding='async';
-  im.onload=()=>{
-    if(hqLoaded===src){
-      bg.src=src;
-      requestAnimationFrame(()=>bg.classList.add('ready'));
-      window.VEILMARK_PERF.hqBackgroundReady=performance.now();
-    }
-  };
-  im.src=src;
-}
-
 function warmImage(src){const im=new Image();im.decoding='async';im.src=src}
 function idle(fn,delay=0){const go=()=>('requestIdleCallback'in window?requestIdleCallback(fn,{timeout:900}):setTimeout(fn,0));delay?setTimeout(go,delay):go()}
 function nativeReady(){return typeof NativeAuth!=='undefined'}
 function warmNativeAuth(){if(!nativeReady()||typeof NativeAuth.warmAuth!=='function')return;try{NativeAuth.warmAuth()}catch{}}
-function warmOnboarding(){idle(()=>{warmImage('media/envelope-closed.webp');warmImage('media/envelope-open.webp')},450);idle(()=>warmImage('media/investigator-paper.webp'),1100);idle(warmNativeAuth,1600)}
+function warmOnboarding(){idle(()=>{warmImage('media/envelope-closed.webp');warmImage('media/envelope-open.webp')},450);idle(warmNativeAuth,1200)}
 function hideAll(){[intro,envelopeScreen,profile,hq,splash].forEach(x=>x&&(x.hidden=true))}
 
 function stopSceneAudio(){
@@ -82,7 +58,6 @@ function showHQ(name){
   renderCases();
   setCaseView(hq.dataset.caseView||'free');
   window.VEILMARK_PERF.hqVisible=performance.now();
-  requestAnimationFrame(loadHQ);
 }
 
 function showEnvelope(){
@@ -95,7 +70,6 @@ function showEnvelope(){
   requestAnimationFrame(()=>envelopeScreen.classList.add('visible'));
   intro.classList.add('intro-exit');
   window.VEILMARK_PERF.envelopeVisible=performance.now();
-  warmImage('media/investigator-paper.webp');
   warmNativeAuth();
   setTimeout(()=>{intro.hidden=true;intro.classList.remove('intro-exit')},170);
 }
@@ -128,7 +102,7 @@ function setAuthMode(mode){
   const isLogin=mode==='login',isName=mode==='googleName';
   const nameLabel=$('playerName').closest('label'),emailLabel=$('playerEmail').closest('label'),passLabel=$('playerPassword').closest('label'),confirmLabel=$('playerPasswordConfirm').closest('label');
   document.querySelector('.identity-form h1').textContent=isName?'اختر اسم المحقق':(isLogin?'تسجيل دخول المحقق':'إنشاء هوية المحقق');
-  document.querySelector('.identity-form p').textContent=isName?'اختر الاسم الذي سيظهر للاعبين داخل القضايا. حساب Google يبقى خاصًا.':'بياناتك الخاصة لا تظهر للاعبين. اسم المحقق فقط هو الذي يظهر داخل القضايا.';
+  document.querySelector('.identity-form p').textContent=isName?'هذا الاسم هو الذي سيظهر للاعبين.':'اسم المحقق فقط هو الذي يظهر للاعبين.';
   nameLabel.hidden=isLogin;
   emailLabel.hidden=isName;
   passLabel.hidden=isName;
@@ -216,6 +190,5 @@ $('googleAuth').onclick=()=>{if(authBusy)return;if(!nativeReady())return error.t
 $('existingAccount').onclick=()=>setAuthMode(authMode==='create'?'login':'create');
 document.querySelectorAll('.case-tab').forEach(b=>b.onclick=()=>setCaseView(b.dataset.view));
 $('hqSettings').onclick=()=>$('settingsSheet').hidden=false;$('closeSettings').onclick=()=>$('settingsSheet').hidden=true;$('replayIntro').onclick=()=>{$('settingsSheet').hidden=true;startIntro(true)};
-let resizeTimer;window.addEventListener('resize',()=>{if(!hq.hidden){clearTimeout(resizeTimer);resizeTimer=setTimeout(loadHQ,140)}},{passive:true});
 document.addEventListener('click',e=>{const c=e.target.closest?.('.case-card');if(c){store.set('last_case',c.dataset.case);c.animate([{transform:'scale(.985)'},{transform:'scale(1)'}],{duration:100})}});
 boot();
