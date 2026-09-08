@@ -1,0 +1,10 @@
+from pathlib import Path
+p=Path('app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java')
+s=p.read_text()
+s=s.replace('if(d.exists())sendSearchDoc(me,d);else fallbackSearchByFields(me,q);','if(d.exists())sendSearchDoc(me,d,q);else fallbackSearchByFields(me,q);')
+s=s.replace('sendSearchResult(me,byUser);return;','sendSearchResult(me,byUser,q);return;')
+s=s.replace('byName->sendSearchResult(me,byName)','byName->sendSearchResult(me,byName,q)')
+s=s.replace('private void sendSearchDoc(FirebaseUser me,DocumentSnapshot d){try{JSONObject out=new JSONObject();out.put("ok",true);out.put("action","search");','private void sendSearchDoc(FirebaseUser me,DocumentSnapshot d,String q){try{JSONObject out=new JSONObject();out.put("ok",true);out.put("action","search");out.put("query",q);')
+s=s.replace('private void sendSearchResult(FirebaseUser me,QuerySnapshot snap){try{JSONObject out=new JSONObject();out.put("ok",true);out.put("action","search");','private void sendSearchResult(FirebaseUser me,QuerySnapshot snap,String q){try{JSONObject out=new JSONObject();out.put("ok",true);out.put("action","search");out.put("query",q);')
+p.write_text(s)
+print('Applied search response correlation')
