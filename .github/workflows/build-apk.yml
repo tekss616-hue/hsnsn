@@ -25,11 +25,12 @@ jobs:
           set -euo pipefail
           SRC=/tmp/veilmark-src
           mkdir -p "$SRC" app/src/main/assets/media
+          base64 -d branding/game-identity.webp.b64 > app/src/main/assets/media/game-identity.webp
+          python3 tools/apply_account_social_patch.py
+          sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
-          # Keep source-quality media out of the final APK. The runtime gets only optimized derivatives.
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
           rm -f app/src/main/assets/intro-vertical-final.mp4
-
           mv "app/src/main/res/values/wren-hotel-intro-landscape.png" "$SRC/hotel-landscape.png"
           mv "app/src/main/res/values/wren-hotel-intro-portrait.png" "$SRC/hotel-portrait.png"
           mv "app/src/main/res/values/wren-hotel-corridor-landscape.png" "$SRC/corridor-landscape.png"
@@ -49,36 +50,20 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image
-
-          src = Path('/tmp/veilmark-src')
-          media = Path('app/src/main/assets/media')
-
-          def webp(source, dest, max_size=None, quality=82):
-              im = Image.open(source)
-              if max_size:
-                  im.thumbnail(max_size, Image.Resampling.LANCZOS)
-              im.save(dest, 'WEBP', quality=quality, method=5)
-
-          webp(src/'envelope-closed.png', media/'envelope-closed.webp', (1024, 1024), 84)
-          webp(src/'envelope-open.png', media/'envelope-open.webp', (1024, 1024), 84)
-
-          poster = Image.open(src/'hotel-portrait.png').convert('RGB').resize((540, 960), Image.Resampling.LANCZOS)
-          poster.save(media/'intro-poster.webp', 'WEBP', quality=80, method=5)
+          src=Path('/tmp/veilmark-src'); media=Path('app/src/main/assets/media')
+          def webp(source,dest,max_size=None,quality=82):
+              im=Image.open(source)
+              if max_size: im.thumbnail(max_size,Image.Resampling.LANCZOS)
+              im.save(dest,'WEBP',quality=quality,method=5)
+          webp(src/'envelope-closed.png',media/'envelope-closed.webp',(1024,1024),84)
+          webp(src/'envelope-open.png',media/'envelope-open.webp',(1024,1024),84)
+          poster=Image.open(src/'hotel-portrait.png').convert('RGB').resize((540,960),Image.Resampling.LANCZOS)
+          poster.save(media/'intro-poster.webp','WEBP',quality=80,method=5)
           PY
 
-          # A 720p H.264 intro is substantially lighter to open/decode than the 1080p source on phones.
-          ffmpeg -y -hide_banner -loglevel error \
-            -i "$SRC/intro.mp4" \
-            -vf "scale=720:1280:flags=lanczos,fps=30" \
-            -c:v libx264 -preset medium -crf 24 -profile:v high -level 4.0 -pix_fmt yuv420p \
-            -c:a aac -b:a 96k -movflags +faststart \
-            app/src/main/assets/intro-runtime.mp4
-
-          # HQ is now rendered dynamically in HTML/CSS. No legacy HQ images are packaged.
+          ffmpeg -y -hide_banner -loglevel error -i "$SRC/intro.mp4" -vf "scale=720:1280:flags=lanczos,fps=30" -c:v libx264 -preset medium -crf 24 -profile:v high -level 4.0 -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart app/src/main/assets/intro-runtime.mp4
           rm -rf app/src/main/assets/hq
-          rm -f app/src/main/assets/investigator-hq-responsive-pack.zip
-          rm -f app/src/main/assets/media/investigator-paper.webp
-
+          rm -f app/src/main/assets/investigator-hq-responsive-pack.zip app/src/main/assets/media/investigator-paper.webp
           echo "Runtime asset sizes:"
           du -h app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/*.webp | sort -h
 
@@ -101,15 +86,7 @@ jobs:
           KEYSTORE="$HOME/.config/.android/debug.keystore"
           mkdir -p "$(dirname "$KEYSTORE")"
           if [ ! -f "$KEYSTORE" ]; then
-            keytool -genkeypair -v \
-              -keystore "$KEYSTORE" \
-              -storepass android \
-              -alias AndroidDebugKey \
-              -keypass android \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
+            keytool -genkeypair -v -keystore "$KEYSTORE" -storepass android -alias AndroidDebugKey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
       - name: Set up Gradle
