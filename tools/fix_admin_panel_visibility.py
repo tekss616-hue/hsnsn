@@ -28,3 +28,9 @@ setTimeout(syncAdminPanel,100);
 '''
 jsf.write_text(js,encoding='utf-8')
 print('Fixed admin panel visibility using authenticated Firebase account')
+
+# Apply the first functional admin dashboard batch from the same build step.
+admin_batch=Path('tools/apply_admin_first_batch.py')
+if not admin_batch.exists():
+    raise SystemExit('apply_admin_first_batch.py missing')
+exec(compile(admin_batch.read_text(encoding='utf-8'),str(admin_batch),'exec'),{})
