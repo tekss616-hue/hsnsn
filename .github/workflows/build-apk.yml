@@ -35,6 +35,7 @@ jobs:
           dst.write_bytes(base64.b64decode(data, validate=False))
           PY
           python3 tools/apply_account_social_patch.py
+          python3 tools/apply_auth_persistence_patch.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
@@ -74,6 +75,14 @@ jobs:
           rm -f app/src/main/assets/investigator-hq-responsive-pack.zip app/src/main/assets/media/investigator-paper.webp
           echo "Runtime asset sizes:"
           du -h app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/*.webp | sort -h
+
+      - name: Verify auth and search patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'PROFILE_SEP' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'collection("usernames").document(q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'payload.put("hasProfile",hasProfile||!username.isEmpty())' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
