@@ -87,14 +87,19 @@ jobs:
           node --check app/src/main/assets/social.js
           grep -q 'AUTH_PROFILE_SEP' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'claimProfileDocs' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'اسم المستخدم مستخدم بالفعل' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'USERNAME_TAKEN' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'rollbackNewAccount' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'String name = authVisibleName(user);' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'setDisplayName(name.trim())' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'collection("usernames").document(q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'out.put("query",q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q "r.action==='google'||r.action==='login'||r.action==='restore'" app/src/main/assets/app.js
           grep -q 'id="appDialog"' app/src/main/assets/index.html
           grep -q 'function showAppDialog' app/src/main/assets/app.js
           grep -q 'اسم المستخدم الحالي مستخدم بحساب آخر' app/src/main/assets/app.js
           grep -q 'search-spinner' app/src/main/assets/social.css
           grep -q 'user-select:none' app/src/main/assets/styles.css
+          ! grep -q 'encodedDisplayName' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           ! grep -q 'confirm(' app/src/main/assets/app.js
           ! grep -q 'confirm(' app/src/main/assets/social.js
           ! grep -q 'alert(' app/src/main/assets/app.js
