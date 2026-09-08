@@ -37,3 +37,8 @@ nader_ai=Path('tools/apply_nader_ai_admin.py')
 if not nader_ai.exists():
     raise SystemExit('apply_nader_ai_admin.py missing')
 exec(compile(nader_ai.read_text(encoding='utf-8'),str(nader_ai),'exec'),{})
+
+ai_server=Path('tools/apply_ai_server_url.py')
+if not ai_server.exists():
+    raise SystemExit('apply_ai_server_url.py missing')
+exec(compile(ai_server.read_text(encoding='utf-8'),str(ai_server),'exec'),{})
