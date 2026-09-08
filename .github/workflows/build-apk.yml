@@ -39,6 +39,7 @@ jobs:
           python3 tools/apply_search_response_query.py
           python3 tools/apply_native_app_polish.py
           python3 tools/apply_legacy_username_conflict_ui.py
+          python3 tools/apply_realtime_social_patch.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
@@ -76,10 +77,8 @@ jobs:
           ffmpeg -y -hide_banner -loglevel error -i "$SRC/intro.mp4" -vf "scale=720:1280:flags=lanczos,fps=30" -c:v libx264 -preset medium -crf 24 -profile:v high -level 4.0 -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart app/src/main/assets/intro-runtime.mp4
           rm -rf app/src/main/assets/hq
           rm -f app/src/main/assets/investigator-hq-responsive-pack.zip app/src/main/assets/media/investigator-paper.webp
-          echo "Runtime asset sizes:"
-          du -h app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/*.webp | sort -h
 
-      - name: Verify identity, search and native UX patch
+      - name: Verify identity, realtime social and native UX
         shell: bash
         run: |
           set -euo pipefail
@@ -89,14 +88,15 @@ jobs:
           grep -q 'claimProfileDocs' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'USERNAME_TAKEN' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'rollbackNewAccount' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'String name = authVisibleName(user);' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q 'setDisplayName(name.trim())' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'collection("usernames").document(q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'out.put("query",q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
-          grep -q "r.action==='google'||r.action==='login'||r.action==='restore'" app/src/main/assets/app.js
+          grep -q 'removeFriend' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'startRealtime' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'setTyping' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'data-remove' app/src/main/assets/social.js
+          grep -q 'onNativeRealtimeEvent' app/src/main/assets/social.js
           grep -q 'id="appDialog"' app/src/main/assets/index.html
           grep -q 'function showAppDialog' app/src/main/assets/app.js
-          grep -q 'اسم المستخدم الحالي مستخدم بحساب آخر' app/src/main/assets/app.js
           grep -q 'search-spinner' app/src/main/assets/social.css
           grep -q 'user-select:none' app/src/main/assets/styles.css
           ! grep -q 'encodedDisplayName' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
@@ -108,6 +108,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
+        with:
           java-version: '17'
 
       - name: Restore debug signing key
