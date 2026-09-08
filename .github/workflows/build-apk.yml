@@ -40,6 +40,7 @@ jobs:
           python3 tools/apply_native_app_polish.py
           python3 tools/apply_legacy_username_conflict_ui.py
           python3 tools/apply_realtime_social_patch.py
+          python3 tools/fix_realtime_chat_watch.py
           python3 tools/apply_delete_reauth_patch.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
@@ -93,6 +94,8 @@ jobs:
           grep -q 'out.put("query",q)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'removeFriend' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'startRealtime' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'watchChat' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'stopChatWatch' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'setTyping' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'showNativeNotification' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'reauthenticatePasswordAndDelete' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
