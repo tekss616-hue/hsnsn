@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { getApps, initializeApp } from 'firebase-admin/app';
+import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { CaseEngine } from './brain/case-engine.js';
 import { MockProvider } from './providers/mock-provider.js';
@@ -19,7 +19,32 @@ const caseData = JSON.parse(await readFile(casePath, 'utf8'));
 const roleConfig = JSON.parse(await readFile(rolePath, 'utf8'));
 const directorConfig = JSON.parse(await readFile(directorPath, 'utf8'));
 
-if (!getApps().length) initializeApp();
+function initializeFirebaseAdmin() {
+  if (getApps().length) return;
+  const raw = String(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '').trim();
+  if (!raw) {
+    initializeApp();
+    return;
+  }
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(raw);
+  } catch {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON_invalid_json');
+  }
+  if (!serviceAccount.project_id || !serviceAccount.client_email || !serviceAccount.private_key) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON_missing_fields');
+  }
+  initializeApp({
+    credential: cert({
+      projectId: serviceAccount.project_id,
+      clientEmail: serviceAccount.client_email,
+      privateKey: String(serviceAccount.private_key).replace(/\\n/g, '\n')
+    })
+  });
+}
+
+initializeFirebaseAdmin();
 
 const envHasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 const provider = envHasOpenAI ? new OpenAIProvider() : new MockProvider();
@@ -84,7 +109,6 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    // Admin AI configuration. The API key is never returned to the app after it is stored.
     if (req.method === 'GET' && req.url === '/api/admin/ai/status') {
       const admin = await requireAdmin(req);
       return send(res, 200, {
