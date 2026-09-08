@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           SRC=/tmp/veilmark-src
-          mkdir -p "$SRC" app/src/main/assets/media app/src/main/assets/hq
+          mkdir -p "$SRC" app/src/main/assets/media
 
           # Keep source-quality media out of the final APK. The runtime gets only optimized derivatives.
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
@@ -61,7 +61,6 @@ jobs:
 
           webp(src/'envelope-closed.png', media/'envelope-closed.webp', (1024, 1024), 84)
           webp(src/'envelope-open.png', media/'envelope-open.webp', (1024, 1024), 84)
-          webp(src/'investigator-paper.png', media/'investigator-paper.webp', (900, 1400), 84)
 
           poster = Image.open(src/'hotel-portrait.png').convert('RGB').resize((540, 960), Image.Resampling.LANCZOS)
           poster.save(media/'intro-poster.webp', 'WEBP', quality=80, method=5)
@@ -75,21 +74,13 @@ jobs:
             -c:a aac -b:a 96k -movflags +faststart \
             app/src/main/assets/intro-runtime.mp4
 
-          unzip -o app/src/main/assets/investigator-hq-responsive-pack.zip -d app/src/main/assets/hq
-          python3 - <<'PY'
-          from pathlib import Path
-          from PIL import Image
-          root = Path('app/src/main/assets/hq')
-          for p in root.rglob('*.png'):
-              im = Image.open(p)
-              out = p.with_suffix('.webp')
-              im.save(out, 'WEBP', quality=82, method=5)
-              p.unlink()
-          PY
+          # HQ is now rendered dynamically in HTML/CSS. No legacy HQ images are packaged.
+          rm -rf app/src/main/assets/hq
           rm -f app/src/main/assets/investigator-hq-responsive-pack.zip
+          rm -f app/src/main/assets/media/investigator-paper.webp
 
           echo "Runtime asset sizes:"
-          du -h app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/*.webp app/src/main/assets/hq/*.webp | sort -h
+          du -h app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/*.webp | sort -h
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
