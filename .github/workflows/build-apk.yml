@@ -51,6 +51,7 @@ jobs:
           python3 tools/apply_remaining_round_fixes.py
           python3 tools/fix_admin_panel_visibility.py
           python3 tools/apply_world_first_batch.py
+          python3 tools/apply_real_preview_nader.py
           python3 tools/remove_intro.py
           python3 tools/apply_roleplay_copy_cleanup.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
@@ -105,6 +106,9 @@ jobs:
           grep -q 'REMAINING_ROUND_FIXES' app/src/main/assets/social.js
           grep -q 'ADMIN_PANEL_VISIBILITY_FIX' app/src/main/assets/social.js
           grep -q 'SOCIAL_WORLD_V2' app/src/main/assets/social.js
+          grep -q 'REAL_PREVIEW_NADER_V1' app/src/main/assets/social.js
+          ! grep -q 'function naderReplyFor' app/src/main/assets/social.js
+          grep -q '/api/admin/nader/chat' app/src/main/assets/social.js
           grep -q 'id="worldGame"' app/src/main/assets/index.html
           grep -q 'نادر يكتب' app/src/main/assets/social.js
           grep -q 'social-world-v2' app/src/main/assets/social.css
