@@ -43,6 +43,7 @@ jobs:
           python3 tools/fix_realtime_chat_watch.py
           python3 tools/apply_delete_reauth_patch.py
           python3 tools/apply_puzzle_race.py
+          python3 tools/apply_custom_match_emblem.py
           python3 tools/remove_intro.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
@@ -114,6 +115,9 @@ jobs:
           grep -q 'stage1Chat' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java || grep -q '"stage"+stage+"Chat"' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           test -f app/src/main/assets/puzzle-1.svg
           test -f app/src/main/assets/puzzle-6.svg
+          test -f app/src/main/assets/media/investigation-match-emblem.webp
+          grep -q 'match-emblem-inline' app/src/main/assets/index.html
+          ! grep -q 'ابدأ التحقيق ⚡' app/src/main/assets/index.html
           ! grep -q '<video id="introVideo"' app/src/main/assets/index.html
           ! test -f app/src/main/assets/intro-runtime.mp4
           ! grep -q 'encodedDisplayName' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
