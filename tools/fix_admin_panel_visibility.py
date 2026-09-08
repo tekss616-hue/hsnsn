@@ -29,21 +29,39 @@ jsf.write_text(js,encoding='utf-8')
 print('Fixed admin panel visibility using authenticated Firebase account')
 
 admin_batch=Path('tools/apply_admin_first_batch.py')
-if not admin_batch.exists():
-    raise SystemExit('apply_admin_first_batch.py missing')
+if not admin_batch.exists(): raise SystemExit('apply_admin_first_batch.py missing')
 exec(compile(admin_batch.read_text(encoding='utf-8'),str(admin_batch),'exec'),{})
 
 nader_ai=Path('tools/apply_nader_ai_admin.py')
-if not nader_ai.exists():
-    raise SystemExit('apply_nader_ai_admin.py missing')
+if not nader_ai.exists(): raise SystemExit('apply_nader_ai_admin.py missing')
 exec(compile(nader_ai.read_text(encoding='utf-8'),str(nader_ai),'exec'),{})
 
 ai_server=Path('tools/apply_ai_server_url.py')
-if not ai_server.exists():
-    raise SystemExit('apply_ai_server_url.py missing')
+if not ai_server.exists(): raise SystemExit('apply_ai_server_url.py missing')
 exec(compile(ai_server.read_text(encoding='utf-8'),str(ai_server),'exec'),{})
 
 world_batch=Path('tools/apply_world_first_batch.py')
-if not world_batch.exists():
-    raise SystemExit('apply_world_first_batch.py missing')
+if not world_batch.exists(): raise SystemExit('apply_world_first_batch.py missing')
 exec(compile(world_batch.read_text(encoding='utf-8'),str(world_batch),'exec'),{})
+
+# Must run after both admin and world patches: the legacy admin patch owns the old
+# six-stage preview click handler, so intercept the tile at capture phase and route
+# it exclusively to the new social-world player-view preview.
+jsf=Path('app/src/main/assets/social.js')
+js=jsf.read_text(encoding='utf-8')
+if 'ADMIN_WORLD_PREVIEW_ROUTE_FIX' not in js:
+    js += r'''
+;(()=>{
+const ADMIN_WORLD_PREVIEW_ROUTE_FIX=true;
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#adminPreviewOpen');
+  if(!b)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  const legacy=document.getElementById('adminPreview');
+  if(legacy)legacy.hidden=true;
+  if(window.HSNSNWorld&&typeof window.HSNSNWorld.preview==='function')window.HSNSNWorld.preview();
+},true);
+})();
+'''
+jsf.write_text(js,encoding='utf-8')
+print('Routed admin preview exclusively to the new social world')
