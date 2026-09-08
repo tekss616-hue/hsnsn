@@ -1,6 +1,7 @@
 # Local secrets
 .env
 server/.env
+server/.data/
 
 # Node
 node_modules/
