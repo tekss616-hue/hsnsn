@@ -42,3 +42,8 @@ ai_server=Path('tools/apply_ai_server_url.py')
 if not ai_server.exists():
     raise SystemExit('apply_ai_server_url.py missing')
 exec(compile(ai_server.read_text(encoding='utf-8'),str(ai_server),'exec'),{})
+
+world_batch=Path('tools/apply_world_first_batch.py')
+if not world_batch.exists():
+    raise SystemExit('apply_world_first_batch.py missing')
+exec(compile(world_batch.read_text(encoding='utf-8'),str(world_batch),'exec'),{})
