@@ -116,8 +116,8 @@ jobs:
           test -f app/src/main/assets/puzzle-1.svg
           test -f app/src/main/assets/puzzle-6.svg
           test -f app/src/main/assets/media/investigation-match-emblem.webp
-          grep -q 'match-emblem-inline' app/src/main/assets/index.html
-          ! grep -q 'ابدأ التحقيق ⚡' app/src/main/assets/index.html
+          grep -q 'match-emblem-inline' app/src/main/assets/app.js
+          ! grep -q '⚡ ابدأ التحقيق' app/src/main/assets/app.js
           ! grep -q '<video id="introVideo"' app/src/main/assets/index.html
           ! test -f app/src/main/assets/intro-runtime.mp4
           ! grep -q 'encodedDisplayName' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
