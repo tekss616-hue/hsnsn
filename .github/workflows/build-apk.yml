@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,6 +47,7 @@ jobs:
           python3 tools/apply_delete_reauth_patch.py
           python3 tools/apply_puzzle_race.py
           python3 tools/apply_custom_match_emblem.py
+          python3 tools/apply_in_app_updater.py
           python3 tools/remove_intro.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
@@ -79,7 +83,7 @@ jobs:
           rm -rf app/src/main/assets/hq
           rm -f app/src/main/assets/investigator-hq-responsive-pack.zip app/src/main/assets/media/investigator-paper.webp
 
-      - name: Verify identity, realtime social and puzzle race
+      - name: Verify identity, realtime social, puzzle race and updater
         shell: bash
         run: |
           set -euo pipefail
@@ -117,6 +121,9 @@ jobs:
           test -f app/src/main/assets/puzzle-6.svg
           test -f app/src/main/assets/media/investigation-match-emblem.webp
           grep -q 'match-emblem-inline' app/src/main/assets/app.js
+          grep -q 'LATEST_RELEASE_API' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'beginUpdateDownload' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'android.permission.REQUEST_INSTALL_PACKAGES' app/src/main/AndroidManifest.xml
           ! grep -q '⚡ ابدأ التحقيق' app/src/main/assets/app.js
           ! grep -q '<video id="introVideo"' app/src/main/assets/index.html
           ! test -f app/src/main/assets/intro-runtime.mp4
@@ -152,6 +159,14 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
+      - name: Stamp build version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i -E "s/versionCode [0-9]+/versionCode ${GITHUB_RUN_NUMBER}/" app/build.gradle
+          sed -i -E "s/versionName '[^']+'/versionName '1.0.${GITHUB_RUN_NUMBER}'/" app/build.gradle
+          grep -q "versionCode ${GITHUB_RUN_NUMBER}" app/build.gradle
+
       - name: Print signing report
         run: gradle signingReport
 
@@ -164,3 +179,18 @@ jobs:
           name: action-template-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish successful APK release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="build-${GITHUB_RUN_NUMBER}"
+          APK="hsnsn-${GITHUB_RUN_NUMBER}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$APK"
+          gh release create "$TAG" "$APK" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "HSNSN build ${GITHUB_RUN_NUMBER}" \
+            --notes "نسخة ناجحة جاهزة للتحديث من داخل التطبيق."
