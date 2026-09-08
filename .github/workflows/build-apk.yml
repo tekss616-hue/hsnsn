@@ -46,6 +46,7 @@ jobs:
           python3 tools/apply_gameplay_social_upgrade.py
           python3 tools/fix_gameplay_startup_dialog.py
           python3 tools/apply_nav_startup_fix.py
+          python3 tools/apply_settings_social_language_fix.py
           python3 tools/remove_intro.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
           rm -f app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4 app/src/main/assets/intro-vertical-final.mp4 app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/intro-poster.webp
@@ -95,8 +96,18 @@ jobs:
           grep -q 'reauthenticatePasswordAndDelete' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'data-remove' app/src/main/assets/social.js
           grep -q 'GAMEPLAY_SOCIAL_UPGRADE' app/src/main/assets/social.js
+          grep -q 'SETTINGS_SOCIAL_LANGUAGE_FIX' app/src/main/assets/social.js
           grep -q 'stable-four-item-main-nav' app/src/main/assets/social.css
           grep -q 'grid-template-columns:repeat(4,minmax(0,1fr))' app/src/main/assets/social.css
+          grep -q 'settingsHomeBack' app/src/main/assets/index.html
+          grep -q 'privacyPanel' app/src/main/assets/index.html
+          grep -q 'chatSettingsPanel' app/src/main/assets/index.html
+          grep -q 'languagePanel' app/src/main/assets/index.html
+          grep -q 'chatActionSheet' app/src/main/assets/index.html
+          grep -q 'loadBlockedUsers' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'unblockUser' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'notifications_enabled' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'setTextZoom(100)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q "if(r)r.hidden=true;if(st)st.hidden=true;window.showHQ" app/src/main/assets/social.js
           grep -q 'id="gameStore"' app/src/main/assets/index.html
           grep -q 'id="rankingView"' app/src/main/assets/index.html
