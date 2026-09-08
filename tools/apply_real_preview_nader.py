@@ -25,6 +25,7 @@ js=js.replace("setInterval(()=>{if(!$('worldGame')?.hidden&&Math.random()<.34)mo
 
 if 'function naderReplyFor' in js: raise SystemExit('canned Nader replies still present')
 if "naderTyping=true;render();try{await ensureRealNader()" in js: raise SystemExit('fake pre-request typing still present')
-js += "\n;(()=>{const REAL_PREVIEW_NADER_V2=true;})();\n"
+# Keep V1 marker for the existing workflow guard while V2 is the active implementation.
+js += "\n;(()=>{const REAL_PREVIEW_NADER_V1=true;const REAL_PREVIEW_NADER_V2=true;})();\n"
 jsf.write_text(js,encoding='utf-8')
 print('Fixed real Nader reply bridge and truthful typing indicator')
