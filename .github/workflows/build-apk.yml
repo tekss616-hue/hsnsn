@@ -48,6 +48,7 @@ jobs:
           python3 tools/apply_nav_startup_fix.py
           python3 tools/apply_settings_social_language_fix.py
           python3 tools/fix_typing_indicator_timeout.py
+          python3 tools/apply_remaining_round_fixes.py
           python3 tools/remove_intro.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
           rm -f app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4 app/src/main/assets/intro-vertical-final.mp4 app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/intro-poster.webp
@@ -98,8 +99,10 @@ jobs:
           grep -q 'data-remove' app/src/main/assets/social.js
           grep -q 'GAMEPLAY_SOCIAL_UPGRADE' app/src/main/assets/social.js
           grep -q 'SETTINGS_SOCIAL_LANGUAGE_FIX' app/src/main/assets/social.js
+          grep -q 'REMAINING_ROUND_FIXES' app/src/main/assets/social.js
           grep -q 'typingStopTimer' app/src/main/assets/social.js
           grep -q 'setTimeout(stopLocalTyping,1000)' app/src/main/assets/social.js
+          grep -q 'id="adminPreviewMode"' app/src/main/assets/index.html
           grep -q 'stable-four-item-main-nav' app/src/main/assets/social.css
           grep -q 'grid-template-columns:repeat(4,minmax(0,1fr))' app/src/main/assets/social.css
           grep -q 'settingsHomeBack' app/src/main/assets/index.html
