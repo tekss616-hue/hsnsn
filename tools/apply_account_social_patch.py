@@ -42,13 +42,12 @@ s=s[:start]+auth+s[end:]
 a=s.index('        @JavascriptInterface public void searchPlayer(String query) {')
 b=s.index('        @JavascriptInterface public void sendFriendRequest',a)
 search=r'''        @JavascriptInterface public void searchPlayer(String query) {
-            runOnUiThread(()->{FirebaseUser u=currentUser();if(u==null){socialError("search",null);return;}ensureFirestore();String q=query.trim().replaceFirst("^@","").toLowerCase(Locale.ROOT);
-                firestore.collection("users").whereEqualTo("usernameLower",q).limit(1).get().addOnSuccessListener(byUser->{
-                    if(!byUser.isEmpty()){sendSearchResult(u,byUser);return;}
-                    firestore.collection("users").whereEqualTo("nameLower",q).limit(10).get().addOnSuccessListener(byName->sendSearchResult(u,byName)).addOnFailureListener(e->socialError("search",e));
-                }).addOnFailureListener(e->socialError("search",e));
+            runOnUiThread(()->{FirebaseUser me=currentUser();if(me==null){socialError("search",null);return;}ensureFirestore();String q=query.trim().replaceFirst("^@","").toLowerCase(Locale.ROOT);if(q.isEmpty()){socialError("search",null);return;}
+                firestore.collection("usernames").document(q).get().addOnSuccessListener(idx->{String uid=idx.exists()?idx.getString("uid"):null;if(uid!=null&&!uid.isEmpty()){firestore.collection("users").document(uid).get().addOnSuccessListener(d->{if(d.exists())sendSearchDoc(me,d);else fallbackSearchByFields(me,q);}).addOnFailureListener(e->fallbackSearchByFields(me,q));}else fallbackSearchByFields(me,q);}).addOnFailureListener(e->fallbackSearchByFields(me,q));
             });
         }
+        private void fallbackSearchByFields(FirebaseUser me,String q){firestore.collection("users").whereEqualTo("usernameLower",q).limit(1).get().addOnSuccessListener(byUser->{if(!byUser.isEmpty()){sendSearchResult(me,byUser);return;}firestore.collection("users").whereEqualTo("nameLower",q).limit(10).get().addOnSuccessListener(byName->sendSearchResult(me,byName)).addOnFailureListener(e->socialError("search",e));}).addOnFailureListener(e->socialError("search",e));}
+        private void sendSearchDoc(FirebaseUser me,DocumentSnapshot d){try{JSONObject out=new JSONObject();out.put("ok",true);out.put("action","search");JSONObject p=new JSONObject();p.put("uid",d.getId());p.put("name",str(d,"name","محقق"));p.put("username",str(d,"username",""));p.put("rank",str(d,"rank","محقق"));p.put("self",d.getId().equals(me.getUid()));out.put("player",p);sendSocial(out);}catch(Exception e){socialError("search",e);}}
         private void sendSearchResult(FirebaseUser me,QuerySnapshot snap){try{JSONObject out=new JSONObject();out.put("ok",true);out.put("action","search");for(DocumentSnapshot d:snap.getDocuments()){JSONObject p=new JSONObject();p.put("uid",d.getId());p.put("name",str(d,"name","محقق"));p.put("username",str(d,"username",""));p.put("rank",str(d,"rank","محقق"));p.put("self",d.getId().equals(me.getUid()));out.put("player",p);break;}sendSocial(out);}catch(Exception e){socialError("search",e);}}
 
 '''
