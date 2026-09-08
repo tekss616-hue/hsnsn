@@ -18,12 +18,16 @@ auth=r'''    public class AuthBridge {
                 }catch(Exception e){sendAuthResult(true,action,user,null);}
             });
         }
+        private void finishProfileAuth(FirebaseUser user,String name,String action){
+            UserProfileChangeRequest up=new UserProfileChangeRequest.Builder().setDisplayName(name).build();
+            user.updateProfile(up).addOnCompleteListener(t->{if(t.isSuccessful())sendProfileAuth(action,user,true);else sendAuthResult(false,action,null,t.getException()==null?"تعذر حفظ اسم المحقق.":t.getException().getLocalizedMessage());});
+        }
         private void reserveAndSaveProfile(FirebaseUser user,String name,String username,String action){
             ensureFirestore();String un=cleanUsername(username);if(!validUsername(un)){sendAuthResult(false,action,null,"اسم المستخدم غير صالح.");return;}
             com.google.firebase.firestore.DocumentReference uname=firestore.collection("usernames").document(un);com.google.firebase.firestore.DocumentReference uref=firestore.collection("users").document(user.getUid());
             firestore.runTransaction(tr->{DocumentSnapshot existing=tr.get(uname);if(existing.exists()&&!user.getUid().equals(existing.getString("uid")))throw new com.google.firebase.firestore.FirebaseFirestoreException("اسم المستخدم مستخدم بالفعل.",com.google.firebase.firestore.FirebaseFirestoreException.Code.ABORTED);Map<String,Object> idx=new HashMap<>();idx.put("uid",user.getUid());tr.set(uname,idx);Map<String,Object>d=new HashMap<>();d.put("uid",user.getUid());d.put("name",name);d.put("nameLower",name.trim().toLowerCase(Locale.ROOT));d.put("username",un);d.put("usernameLower",un);d.put("email",user.getEmail()==null?"":user.getEmail());d.put("rank","محقق أول");d.put("updatedAt",FieldValue.serverTimestamp());tr.set(uref,d,com.google.firebase.firestore.SetOptions.merge());return null;})
-            .addOnSuccessListener(v->{UserProfileChangeRequest up=new UserProfileChangeRequest.Builder().setDisplayName(name).build();user.updateProfile(up).addOnCompleteListener(t->sendProfileAuth(action,user,true));})
-            .addOnFailureListener(e->sendAuthResult(false,action,null,e.getLocalizedMessage()));
+            .addOnSuccessListener(v->finishProfileAuth(user,name,action))
+            .addOnFailureListener(e->{if(e instanceof com.google.firebase.firestore.FirebaseFirestoreException&&((com.google.firebase.firestore.FirebaseFirestoreException)e).getCode()==com.google.firebase.firestore.FirebaseFirestoreException.Code.ABORTED)sendAuthResult(false,action,null,e.getLocalizedMessage());else finishProfileAuth(user,name,action);});
         }
         @JavascriptInterface public void createAccount(String name,String username,String email,String password){runOnUiThread(()->{ensureFirebaseAuth();firebaseAuth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(r->{FirebaseUser u=r.getUser();if(u==null){sendAuthResult(false,"create",null,"تعذر إنشاء الحساب.");return;}reserveAndSaveProfile(u,name,username,"create");}).addOnFailureListener(e->sendAuthResult(false,"create",null,e.getLocalizedMessage()));});}
         @JavascriptInterface public void signInEmail(String email,String password){runOnUiThread(()->{ensureFirebaseAuth();firebaseAuth.signInWithEmailAndPassword(email,password).addOnSuccessListener(r->sendProfileAuth("login",r.getUser(),true)).addOnFailureListener(e->sendAuthResult(false,"login",null,e.getLocalizedMessage()));});}
