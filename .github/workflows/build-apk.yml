@@ -108,7 +108,6 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-        with:
           java-version: '17'
 
       - name: Restore debug signing key
