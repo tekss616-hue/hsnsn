@@ -40,6 +40,7 @@ jobs:
           python3 tools/apply_native_app_polish.py
           python3 tools/apply_legacy_username_conflict_ui.py
           python3 tools/apply_realtime_social_patch.py
+          python3 tools/apply_delete_reauth_patch.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
@@ -93,8 +94,12 @@ jobs:
           grep -q 'removeFriend' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'startRealtime' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'setTyping' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'showNativeNotification' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'reauthenticatePasswordAndDelete' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'googleReauthAndDelete' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'data-remove' app/src/main/assets/social.js
           grep -q 'onNativeRealtimeEvent' app/src/main/assets/social.js
+          grep -q 'requestDeletePassword' app/src/main/assets/app.js
           grep -q 'id="appDialog"' app/src/main/assets/index.html
           grep -q 'function showAppDialog' app/src/main/assets/app.js
           grep -q 'search-spinner' app/src/main/assets/social.css
