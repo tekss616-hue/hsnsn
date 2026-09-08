@@ -104,6 +104,7 @@ auth=r'''    public class AuthBridge {
 '''
 s=s[:start]+auth+s[end:]
 
+s=s.replace('String name = user.getDisplayName() == null ? "" : user.getDisplayName().trim();','String name = authVisibleName(user);')
 s=s.replace('u.getDisplayName()==null?"المحقق":u.getDisplayName()','authVisibleName(u).isEmpty()?"المحقق":authVisibleName(u)')
 s=s.replace('u.getDisplayName()==null?"محقق":u.getDisplayName()','authVisibleName(u).isEmpty()?"محقق":authVisibleName(u)')
 s=s.replace('user.getDisplayName()==null?"":user.getDisplayName()','authVisibleName(user)')
