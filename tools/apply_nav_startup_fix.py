@@ -11,7 +11,7 @@ js=js_path.read_text(encoding='utf-8')
 # The roleplay copy update changed the old 3-item HQ markup, so the earlier
 # gameplay patch could no longer match it and inject the functional 4-item nav.
 # Restore the same existing functions/IDs without changing the visual shell.
-nav='<nav class="hq-nav"><button class="active" data-main="play">اللعب</button><button id="rankingTab" data-main="ranking">التصنيف</button><button id="storeTab" data-main="store">المتجر</button><button id="openProfileTab">الملف</button></nav>'
+nav='<nav class="hq-nav"><button class="active" data-main="play">اللعب</button><button id="rankingTab" data-main="ranking">التصنيف</button><button id="storeTab" data-main="store">المتجر</button><button id="openProfileTab" data-main="profile">الملف</button></nav>'
 idx,count=re.subn(r'<nav class="hq-nav">.*?</nav>',nav,idx,count=1,flags=re.S)
 if count!=1:
     raise SystemExit('HQ navigation not found; refusing unsafe patch')
@@ -29,6 +29,11 @@ if marker not in css:
 .hq-nav button{min-width:0!important;white-space:nowrap!important;font-size:clamp(11px,3.4vw,14px)!important;padding-inline:2px!important}
 .game-overlay[hidden]{display:none!important}
 '''
+if '/* active-main-nav-state */' not in css:
+    css += '''\n/* active-main-nav-state */
+.hq-nav button{color:#747474!important;opacity:1!important}
+.hq-nav button.active{color:#fff!important;font-weight:700!important}
+'''
 
 old="document.querySelectorAll('.game-overlay-back').forEach(b=>b.onclick=()=>window.showHQ?.());"
 new="document.querySelectorAll('.game-overlay-back').forEach(b=>b.onclick=()=>{const r=$('rankingView'),st=$('gameStore');if(r)r.hidden=true;if(st)st.hidden=true;window.showHQ?.()});"
@@ -37,7 +42,13 @@ if old in js:
 elif new not in js:
     raise SystemExit('Overlay back handler not found; refusing unsafe patch')
 
+active_marker='MAIN_NAV_ACTIVE_STATE_V1'
+if active_marker not in js:
+    js += r'''
+;(()=>{const MAIN_NAV_ACTIVE_STATE_V1=true;const nav=document.querySelector('.hq-nav');if(!nav)return;const buttons=[...nav.querySelectorAll('button')];function setActive(btn){buttons.forEach(b=>b.classList.toggle('active',b===btn))}buttons.forEach(btn=>btn.addEventListener('click',()=>setActive(btn),true));const oldShowHQ=window.showHQ;if(typeof oldShowHQ==='function'){window.showHQ=function(...args){const r=oldShowHQ.apply(this,args);const play=nav.querySelector('[data-main="play"]');if(play)setActive(play);return r}}})();
+'''
+
 idx_path.write_text(idx,encoding='utf-8')
 css_path.write_text(css,encoding='utf-8')
 js_path.write_text(js,encoding='utf-8')
-print('Restored working store/ranking navigation and four-item bottom bar')
+print('Restored working store/ranking navigation and fixed active tab state')
