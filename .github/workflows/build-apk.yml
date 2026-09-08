@@ -52,6 +52,7 @@ jobs:
           python3 tools/fix_admin_panel_visibility.py
           python3 tools/apply_world_first_batch.py
           python3 tools/remove_intro.py
+          python3 tools/apply_roleplay_copy_cleanup.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
           rm -f app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4 app/src/main/assets/intro-vertical-final.mp4 app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/intro-poster.webp
           mv "app/src/main/res/values/wren-hotel-intro-landscape.png" "$SRC/hotel-landscape.png"
@@ -125,6 +126,11 @@ jobs:
           grep -q "if(r)r.hidden=true;if(st)st.hidden=true;window.showHQ" app/src/main/assets/social.js
           grep -q 'id="gameStore"' app/src/main/assets/index.html
           grep -q 'id="rankingView"' app/src/main/assets/index.html
+          grep -q 'id="storeTab"' app/src/main/assets/index.html
+          grep -q 'id="rankingTab"' app/src/main/assets/index.html
+          grep -q '>المتجر<' app/src/main/assets/index.html
+          grep -q '>التصنيف<' app/src/main/assets/index.html
+          ! grep -Eq 'محقق|التحقيق|القضايا|قضية' app/src/main/assets/index.html app/src/main/assets/app.js app/src/main/assets/social.js
           grep -q 'adminPanelBtn' app/src/main/assets/index.html
           grep -q 'investigatorCard' app/src/main/assets/index.html
           grep -q 'id="appDialog"' app/src/main/assets/index.html
@@ -141,7 +147,6 @@ jobs:
           grep -q 'LATEST_RELEASE_API' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'beginUpdateDownload' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'android.permission.REQUEST_INSTALL_PACKAGES' app/src/main/AndroidManifest.xml
-          ! grep -q '⚡ ابدأ التحقيق' app/src/main/assets/app.js
           ! grep -q '<video id="introVideo"' app/src/main/assets/index.html
           ! grep -q 'id="quickSplash"' app/src/main/assets/index.html
           ! grep -q 'splash.hidden=false' app/src/main/assets/app.js
