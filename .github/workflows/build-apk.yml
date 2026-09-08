@@ -25,7 +25,15 @@ jobs:
           set -euo pipefail
           SRC=/tmp/veilmark-src
           mkdir -p "$SRC" app/src/main/assets/media
-          base64 -d branding/game-identity.webp.b64 > app/src/main/assets/media/game-identity.webp
+          python3 - <<'PY'
+          import base64
+          from pathlib import Path
+          src = Path('branding/game-identity.webp.b64')
+          dst = Path('app/src/main/assets/media/game-identity.webp')
+          data = ''.join(src.read_text(encoding='utf-8').split())
+          data += '=' * (-len(data) % 4)
+          dst.write_bytes(base64.b64decode(data, validate=False))
+          PY
           python3 tools/apply_account_social_patch.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
