@@ -56,10 +56,17 @@ for path in FILES:
 # without deleting or renaming store/ranking/profile behavior.
 idx = Path('app/src/main/assets/index.html')
 html = idx.read_text(encoding='utf-8')
-nav = '<nav class="hq-nav"><button class="active" data-main="play">اللعب</button><button id="rankingTab" data-main="ranking">التصنيف</button><button id="storeTab" data-main="store">المتجر</button><button id="openProfileTab">الملف</button></nav>'
+nav = '<nav class="hq-nav"><button class="active" data-main="play">اللعب</button><button id="rankingTab" data-main="ranking">التصنيف</button><button id="storeTab" data-main="store">المتجر</button><button id="openProfileTab" data-main="profile">الملف</button></nav>'
 html, n = re.subn(r'<nav class="hq-nav">.*?</nav>', nav, html, count=1, flags=re.S)
 if n != 1:
     raise SystemExit('hq-nav not found; refusing unsafe copy cleanup')
 idx.write_text(html, encoding='utf-8')
 
-print('Applied final live-roleplay copy cleanup without changing functional IDs')
+# This MUST be the last runtime patch: it fixes the real Nader callback ownership
+# and binds the active main-nav state after every earlier script has finished.
+repair = Path('tools/apply_final_runtime_repairs.py')
+if not repair.exists():
+    raise SystemExit('apply_final_runtime_repairs.py missing')
+exec(compile(repair.read_text(encoding='utf-8'), str(repair), 'exec'), {})
+
+print('Applied final live-roleplay copy cleanup and runtime repairs')
