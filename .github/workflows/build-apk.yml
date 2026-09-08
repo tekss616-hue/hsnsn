@@ -45,6 +45,7 @@ jobs:
           python3 tools/apply_missing_son_case.py
           python3 tools/apply_missing_son_multiplayer.py
           python3 tools/fix_missing_son_case_event.py
+          python3 tools/apply_two_player_case_test.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
 
           mv "app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4" "$SRC/intro.mp4"
@@ -117,6 +118,8 @@ jobs:
           grep -q 'new CaseBridge(), "NativeCase"' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'public class CaseBridge' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'الابن المفقود' app/src/main/assets/app.js
+          grep -q 'mem.size()==2' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
+          grep -q 'roles.subList(2,6)' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           ! grep -q 'encodedDisplayName' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           ! grep -q 'confirm(' app/src/main/assets/app.js
           ! grep -q 'confirm(' app/src/main/assets/social.js
