@@ -44,6 +44,7 @@ jobs:
           python3 tools/apply_custom_match_emblem.py
           python3 tools/apply_in_app_updater.py
           python3 tools/apply_gameplay_social_upgrade.py
+          python3 tools/fix_gameplay_startup_dialog.py
           python3 tools/remove_intro.py
           sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
           rm -f app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4 app/src/main/assets/intro-vertical-final.mp4 app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/intro-poster.webp
@@ -97,6 +98,9 @@ jobs:
           grep -q 'id="rankingView"' app/src/main/assets/index.html
           grep -q 'adminPanelBtn' app/src/main/assets/index.html
           grep -q 'investigatorCard' app/src/main/assets/index.html
+          grep -q 'id="appDialog"' app/src/main/assets/index.html
+          grep -q 'id="appDialogCancel"' app/src/main/assets/index.html
+          grep -q 'id="appDialogOk"' app/src/main/assets/index.html
           grep -q 'id="puzzleGame"' app/src/main/assets/index.html
           grep -q 'startPuzzleMatch' app/src/main/assets/app.js
           grep -q 'new PuzzleBridge(), "NativePuzzle"' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
