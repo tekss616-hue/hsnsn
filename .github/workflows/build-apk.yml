@@ -108,7 +108,7 @@ jobs:
           set -euo pipefail
           git config user.name "hsnsn-runtime-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add -A app/build.gradle app/src/main/assets app/src/main/java app/src/main/AndroidManifest.xml .github/workflows/build-apk.yml runtime-consolidated-v1
+          git add -A app/build.gradle app/src/main/assets app/src/main/java app/src/main/AndroidManifest.xml runtime-consolidated-v1
           if ! git diff --cached --quiet; then
             git commit -m "Bake consolidated runtime sources [skip ci]"
             git push origin HEAD:main
