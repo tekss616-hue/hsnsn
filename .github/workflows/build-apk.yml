@@ -114,7 +114,9 @@ jobs:
           grep -q 'social-world-v2' app/src/main/assets/social.css
           grep -q 'isAdminAccount' app/src/main/java/com/hsnsn/actiontemplate/MainActivity.java
           grep -q 'typingStopTimer' app/src/main/assets/social.js
-          grep -q 'setTimeout(stopLocalTyping,1000)' app/src/main/assets/social.js
+          grep -q 'typingKeepAlive' app/src/main/assets/social.js
+          grep -q 'setTimeout(stopLocalTyping,1400)' app/src/main/assets/social.js
+          grep -q 'SECOND_ROLEPLAY_BATCH' app/src/main/assets/social.js
           grep -q 'id="adminPreviewMode"' app/src/main/assets/index.html
           grep -q 'stable-four-item-main-nav' app/src/main/assets/social.css
           grep -q 'grid-template-columns:repeat(4,minmax(0,1fr))' app/src/main/assets/social.css
