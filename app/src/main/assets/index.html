@@ -2,19 +2,121 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>عيش الدور</title>
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="onboarding.css"><link rel="stylesheet" href="social.css">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="onboarding.css"><link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">
 </head><body>
-<main id="intro" class="intro" aria-label="مقدمة اللعبة"><video id="introVideo" class="intro-video" src="intro-runtime.mp4" poster="media/intro-poster.webp" preload="metadata" autoplay playsinline webkit-playsinline disablepictureinpicture></video><div class="cinematic-vignette"></div><button id="skipIntro" class="skip">تخطي</button><button id="resumeIntro" class="resume-intro" hidden>اضغط لتشغيل المقدمة</button></main>
-<main id="quickSplash" class="quick-splash" hidden><img class="splash-logo" src="media/game-identity.webp" alt=""><div>عيش الدور</div></main>
+<main id="intro" hidden aria-hidden="true"></main>
+
 <main id="envelopeScreen" class="envelope-screen" hidden><div class="desk-light"></div><div class="envelope-copy"><h1>رحلتك على وشك أن تبدأ</h1><p>افتح الرسالة وادخل إلى دورك.</p></div><button id="envelope" class="image-envelope"><img class="envelope-closed" src="media/envelope-closed.webp" decoding="async"><img class="envelope-open" src="media/envelope-open.webp" decoding="async"></button></main>
 <main id="profile" class="profile" hidden><div class="auth-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div><div class="identity-paper"><div class="identity-form"><h1>إنشاء هويتك</h1><p>اسم شخصيتك يظهر للاعبين، واسم المستخدم فريد لحسابك.</p><label>اسم الشخصية<input id="playerName" maxlength="24" placeholder="الاسم الذي سيراه اللاعبون"></label><label id="usernameLabel">اسم المستخدم<input id="playerUsername" maxlength="20" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="مثال: mansour77"></label><label>البريد الإلكتروني<input id="playerEmail" type="email" autocomplete="email" inputmode="email" placeholder="البريد الإلكتروني"></label><label>كلمة المرور<input id="playerPassword" type="password" minlength="8" autocomplete="current-password" placeholder="8 أحرف على الأقل"></label><div id="formError" class="form-error"></div><button id="createProfile" class="primary">اعتماد هويتي</button><div class="or"><span>أو</span></div><button id="googleAuth" class="google-auth"><b>G</b> المتابعة باستخدام Google</button><button id="existingAccount" class="existing">لدي حساب بالفعل — تسجيل الدخول</button></div></div></main>
-<main id="hq" class="hq" data-case-view="free" hidden><div class="hq-dynamic-bg" aria-hidden="true"><div class="hq-grid-lines"></div><div class="hq-glow hq-glow-red"></div><div class="hq-glow hq-glow-blue"></div><div class="hq-scan"></div><div class="hq-noise"></div></div><div class="hq-shade"></div><header class="hq-top"><div><small>عيش الدور</small><strong id="hqName">اللاعب</strong></div><button id="hqSettings" class="icon-btn">⚙</button></header><div class="case-tabs" aria-label="نوع التجارب"><button class="case-tab active free-tab" data-view="free"><b>التجارب العامة</b><small>حتى 6 لاعبين</small></button><button class="case-tab premium-tab" data-view="premium"><b>التجارب الخاصة</b><small>حتى 10 لاعبين</small></button></div><section class="case-zone"><div class="case-column free"><div class="case-heading"><span>التجارب العامة</span><small>حتى 6 لاعبين</small></div><div id="freeCases" class="case-grid"></div></div><div class="case-column premium"><div class="case-heading"><span>التجارب الخاصة</span><small>حتى 10 لاعبين</small></div><div id="premiumCases" class="case-grid"></div></div></section><nav class="hq-nav"><button class="active">الأدوار</button><button id="openProfileTab">الملف</button><button>التصنيف</button></nav></main>
+<main id="hq" class="hq" data-case-view="free" hidden><div class="hq-dynamic-bg" aria-hidden="true"><div class="hq-grid-lines"></div><div class="hq-glow hq-glow-red"></div><div class="hq-glow hq-glow-blue"></div><div class="hq-scan"></div><div class="hq-noise"></div></div><div class="hq-shade"></div><header class="hq-top"><div><small>عيش الدور</small><strong id="hqName">اللاعب</strong></div><button id="hqSettings" class="icon-btn">⚙</button></header><div class="case-tabs" aria-label="نوع التجارب"><button class="case-tab active free-tab" data-view="free"><b>التجارب العامة</b><small>حتى 6 لاعبين</small></button><button class="case-tab premium-tab" data-view="premium"><b>التجارب الخاصة</b><small>حتى 10 لاعبين</small></button></div><section class="case-zone"><div class="case-column free"><div class="case-heading"><span>التجارب العامة</span><small>حتى 6 لاعبين</small></div><div id="freeCases" class="case-grid"></div></div><div class="case-column premium"><div class="case-heading"><span>التجارب الخاصة</span><small>حتى 10 لاعبين</small></div><div id="premiumCases" class="case-grid"></div></div></section><nav class="hq-nav"><button class="active" data-main="play">اللعب</button><button id="rankingTab" data-main="ranking">التصنيف</button><button id="storeTab" data-main="store">المتجر</button><button id="openProfileTab" data-main="profile">الملف</button></nav></main>
+<main id="rankingView" class="game-overlay" hidden><header><button class="game-overlay-back">‹</button><h2>التصنيف</h2></header><div class="game-overlay-body"><h1>تصنيف اللاعبين</h1><p>ترتيبك يتطور من مشاركاتك ونتائجك داخل تجارب عيش الدور.</p><div class="rank-placeholder">1000 <small>نقطة بداية</small></div></div></main>
+<main id="gameStore" class="game-overlay" hidden><header><button class="game-overlay-back">‹</button><h2>المتجر</h2></header><div class="game-overlay-body"><h1>متجر اللاعب</h1><p id="storeHint">خصص هويتك داخل اللعبة.</p><div id="cosmeticStoreGrid" class="cosmetic-grid"></div></div></main>
 <main id="social" class="social" hidden><div class="social-bg" aria-hidden="true"></div><div class="social-shell"><header class="social-head"><button id="socialBack" class="social-icon" aria-label="العودة">‹</button><h2>ملف اللاعب</h2><button id="socialBell" class="social-icon" aria-label="الإشعارات">♢<span id="socialBellBadge" class="social-badge" hidden></span></button></header><div class="social-body">
-<section class="social-panel active" data-panel="profile"><div class="profile-hero"><div class="profile-main"><div class="avatar-ring"><div id="socialAvatar" class="avatar-core">م</div></div><div class="profile-copy"><h1 id="socialName">اللاعب</h1><p id="socialUsername">@username</p><p id="socialRank">صانع الدور</p><div class="level-row"><span class="level-pill">المستوى <b id="socialLevel">1</b></span><div class="xp"><i id="xpBar"></i></div></div></div></div><div class="stats-grid"><div class="stat"><b id="statCases">0</b><small>الأدوار</small></div><div class="stat"><b id="statSolved">0</b><small>المكتملة</small></div><div class="stat"><b id="statAccuracy">0%</b><small>الإنجاز</small></div></div></div><div class="section-title"><h3>الشارات</h3><small>تتطور مع إنجازاتك</small></div><div class="badge-row"><div class="award">◈<small>البداية</small></div><div class="award">⌁<small>ملاحظ</small></div><div class="award">◇<small>متفاعل</small></div><div class="award">✦<small>صانع دور</small></div></div><div class="section-title"><h3>الحساب</h3><small>إدارة جلسة الدخول والحساب</small></div><div class="account-actions"><button id="profileLogout" class="setting-action">تسجيل الخروج</button><button id="profileDelete" class="setting-action" style="margin-top:8px;color:#e56b72;border-color:#8d1d2566">حذف الحساب نهائيًا</button></div></section>
+<section class="social-panel active" data-panel="profile"><div class="profile-hero" id="investigatorCard" role="button" tabindex="0" aria-label="فتح متجر بطاقات الشخصية"><div class="profile-main"><div class="avatar-ring" id="investigatorAvatar" role="button" tabindex="0" aria-label="فتح متجر الأفاتارات والإطارات"><div id="socialAvatar" class="avatar-core">م</div></div><div class="profile-copy"><h1 id="socialName">اللاعب</h1><p id="socialUsername">@username</p><p id="socialRank">صانع الدور</p><div class="level-row"><span class="level-pill">المستوى <b id="socialLevel">1</b></span><div class="xp"><i id="xpBar"></i></div></div></div></div><div class="stats-grid"><div class="stat"><b id="statCases">0</b><small>الأدوار</small></div><div class="stat"><b id="statSolved">0</b><small>المكتملة</small></div><div class="stat"><b id="statAccuracy">0%</b><small>الإنجاز</small></div></div></div><div class="section-title"><h3>الشارات</h3><small>تتطور مع إنجازاتك</small></div><div class="badge-row"><div class="award">◈<small>البداية</small></div><div class="award">⌁<small>ملاحظ</small></div><div class="award">◇<small>متفاعل</small></div><div class="award">✦<small>صانع دور</small></div></div><div class="section-title"><h3>المظهر والمخزون</h3><small>عناصرك المملوكة</small></div><button id="inventoryBtn" class="setting-action">المخزون</button><div class="section-title"><h3>الحساب</h3><small>إدارة جلسة الدخول والحساب</small></div><div class="account-actions"><button id="profileLogout" class="setting-action">تسجيل الخروج</button><button id="profileDelete" class="setting-action" style="margin-top:8px;color:#e56b72;border-color:#8d1d2566">حذف الحساب نهائيًا</button></div></section>
 <section class="social-panel" data-panel="friends"><div class="section-title"><h3>الأصدقاء</h3><small>ابحث باسم المستخدم أو اسم الشخصية</small></div><div class="social-tools"><input id="friendSearch" class="social-search" maxlength="24" placeholder="@اسم_المستخدم أو اسم الشخصية"><button id="friendSearchBtn" class="social-action">بحث</button></div><div id="searchResult" class="social-list"></div><div class="section-title"><h3>قائمة الأصدقاء</h3></div><div id="friendsList" class="social-list"><div class="empty-state">لا يوجد أصدقاء بعد.</div></div></section>
 <section class="social-panel" data-panel="requests"><div class="section-title"><h3>طلبات الصداقة</h3></div><div id="requestsList" class="social-list"><div class="empty-state">لا توجد طلبات حالياً.</div></div></section>
 <section class="social-panel" data-panel="chats"><div class="section-title"><h3>المحادثات</h3><small>للأصدقاء فقط</small></div><div id="chatsList" class="social-list"><div class="empty-state">لا توجد محادثات بعد.</div></div></section>
 </div><nav class="social-nav"><button class="active" data-panel="profile">الملف</button><button data-panel="friends">الأصدقاء</button><button data-panel="requests">الطلبات<span class="nav-dot" data-request-badge hidden></span></button><button data-panel="chats">المحادثات</button></nav></div>
 <div id="chatView" class="chat-view" hidden><header class="chat-head"><button id="chatBack" aria-label="رجوع">‹</button><div class="mini-avatar">◈</div><b id="chatPeerName">اللاعب</b></header><div id="messages" class="messages"></div><div class="composer"><input id="chatInput" maxlength="1000" placeholder="اكتب رسالة…"><button id="chatSend">➤</button></div></div><div id="socialToast" class="toast-social"></div></main>
-<div id="settingsSheet" class="settings-sheet" hidden><div class="settings-card"><button id="closeSettings" class="close">×</button><h2>الإعدادات</h2><button id="settingsProfile" class="setting-action">ملف اللاعب</button><button id="settingsFriends" class="setting-action">الأصدقاء والمحادثات</button><button id="settingsLogout" class="setting-action">تسجيل الخروج</button><button id="settingsDelete" class="setting-action" style="margin-top:8px;color:#e56b72;border-color:#8d1d2566">حذف الحساب نهائيًا</button></div></div>
-<script src="app.js"></script><script src="social.js"></script></body></html>
+
+<main id="puzzleGame" class="puzzle-game" hidden>
+  <header class="puzzle-top">
+    <button id="puzzleExit" class="puzzle-back" aria-label="الخروج">‹</button>
+    <div><small>تجربة تنافسي</small><strong id="puzzleStageLabel">المرحلة 1 / 6</strong></div>
+    <span id="puzzlePlayerCount" class="puzzle-count">0/7</span>
+  </header>
+  <section id="puzzleWaiting" class="puzzle-waiting">
+    <div class="radar"><i></i><b>⌁</b></div>
+    <h1>جارٍ البحث عن لاعبين…</h1>
+    <p>سنبدأ فور اكتمال سبعة لاعبين.</p>
+    <strong id="puzzleWaitingCount">1 / 7</strong>
+    <button id="cancelPuzzleMatch" class="puzzle-secondary">إلغاء المطابقة</button>
+  </section>
+  <section id="puzzleArena" class="puzzle-arena" hidden>
+    <div class="puzzle-progress"><i id="puzzleProgressBar"></i></div>
+    <div class="puzzle-image-wrap"><img id="puzzleImage" src="puzzle-1.svg" alt="صورة عيش الدور"><div class="scan-line"></div></div>
+    <div class="puzzle-panels">
+      <section class="system-panel">
+        <div class="panel-title"><b>اسأل النظام</b><small>الإجابة: نعم / لا / غير ضروري</small></div>
+        <div id="puzzleSystemFeed" class="system-feed"><div class="system-note">حلّل الصورة واسأل سؤالًا واحدًا في كل مرة.</div></div>
+        <div class="puzzle-compose"><input id="puzzleQuestion" maxlength="180" placeholder="مثال: هل الشيء مصنوع من معدن؟"><button id="puzzleAsk">اسأل</button></div>
+      </section>
+      <section class="stage-chat-panel">
+        <div class="panel-title"><b>محادثة المرحلة</b><small id="stagePeersText">من في نفس مرحلتك فقط</small></div>
+        <div id="puzzleStageChat" class="stage-chat"></div>
+        <div class="puzzle-compose"><input id="puzzleChatInput" maxlength="500" placeholder="اكتب لللاعبين في مرحلتك…"><button id="puzzleChatSend">➤</button></div>
+      </section>
+    </div>
+    <section class="solution-box"><div><b>توصلت للكلمة؟</b><small>الحل لا يُحسب من خلال سؤال النظام.</small></div><div class="solution-row"><input id="puzzleSolution" maxlength="32" placeholder="اكتب الكلمة المفتاحية"><button id="puzzleSolve">تحقق من الحل</button></div><div id="puzzleSolveMsg"></div></section>
+  </section>
+  <section id="puzzleFinished" class="puzzle-finished" hidden><div class="finish-mark">✓</div><h1>أنهيت عيش الدور</h1><p>اكتشفت الكلمات الست. سنضيف النقاط والترتيب الشهري في الخطوة المخصصة لهما.</p><button id="puzzleReturn" class="puzzle-primary">العودة للقسم</button></section>
+  <div id="puzzleToast" class="puzzle-toast"></div>
+</main>
+
+<div id="settingsSheet" class="settings-sheet" hidden><div class="settings-card pro-settings"><button id="closeSettings" class="close">×</button><div class="settings-topbar"><button id="settingsHomeBack" class="settings-back" aria-label="العودة">‹</button><h2>الإعدادات</h2></div><div class="settings-section-label">اللعبة</div><label class="setting-toggle">الصوت والمؤثرات <input id="settingSound" type="checkbox" checked></label><label class="setting-toggle">الاهتزاز <input id="settingVibration" type="checkbox" checked></label><label class="setting-toggle">إشعارات اللعبة <input id="settingNotifications" type="checkbox" checked></label><div class="settings-section-label">التجربة</div><button id="settingAppearance" class="setting-action">المظهر <span>داكن</span></button><button id="settingLanguage" class="setting-action">اللغة <span>العربية</span></button><button id="settingPrivacy" class="setting-action">الخصوصية والحظر</button><button id="settingChat" class="setting-action">إعدادات المحادثة</button><div class="settings-section-label">الدعم</div><button id="settingHelp" class="setting-action">المساعدة والإبلاغ</button><button id="settingVersion" class="setting-action">الإصدار والتحديث</button><button id="adminPanelBtn" class="setting-action admin-setting" hidden>لوحة الإدارة</button><div class="settings-section-label">الحساب والأمان</div><button id="settingsLogout" class="setting-action">تسجيل الخروج</button><button id="settingsDelete" class="setting-action danger-setting">حذف الحساب نهائيًا</button></div></div>
+
+<div id="appDialog" class="app-dialog" hidden aria-hidden="true"><div class="app-dialog-card" role="dialog" aria-modal="true" aria-labelledby="appDialogTitle"><div class="app-dialog-mark">◈</div><h3 id="appDialogTitle">تأكيد</h3><p id="appDialogMessage"></p><div class="app-dialog-actions"><button id="appDialogCancel" class="app-dialog-btn secondary">إلغاء</button><button id="appDialogOk" class="app-dialog-btn primary-dialog">تأكيد</button></div></div></div>
+
+<div id="privacyPanel" class="settings-subpanel" hidden><div class="subpanel-card"><header><button data-settings-close>‹</button><h2>الخصوصية والحظر</h2></header><p class="subpanel-copy">اللاعبون المحظورون</p><div id="blockedUsersList" class="blocked-list"><div class="empty-state">لا يوجد لاعبون محظورون.</div></div></div></div>
+<div id="chatSettingsPanel" class="settings-subpanel" hidden><div class="subpanel-card"><header><button data-settings-close>‹</button><h2>إعدادات المحادثة</h2></header><label class="setting-toggle">مؤشرات الكتابة <input id="chatTypingPref" type="checkbox" checked></label><label class="setting-toggle">معاينة آخر رسالة <input id="chatPreviewPref" type="checkbox" checked></label><p class="subpanel-copy">اضغط مطولًا على أي محادثة لتثبيتها أو كتمها أو حذفها من قائمتك.</p></div></div>
+<div id="languagePanel" class="settings-subpanel" hidden><div class="subpanel-card"><header><button data-settings-close>‹</button><h2>اللغة</h2></header><button class="setting-action language-choice" data-lang-choice="ar">العربية</button><button class="setting-action language-choice" data-lang-choice="en">English</button></div></div>
+<div id="chatActionSheet" class="chat-actions-modal" hidden><div class="modal-card"><h2 id="chatActionName">المحادثة</h2><button id="chatPinAction" class="setting-action">تثبيت المحادثة</button><button id="chatMuteAction" class="setting-action">كتم الإشعارات</button><button id="chatDeleteAction" class="setting-action danger-setting">حذف المحادثة</button><button id="chatActionCancel" class="setting-action">إلغاء</button></div></div>
+<main id="adminPreviewMode" class="admin-preview" hidden>
+<header><button id="adminPreviewBack">‹</button><div><small>ADMIN ONLY</small><h2>وضع المعاينة</h2></div><span>بدون نقاط</span></header>
+<section class="admin-preview-body"><div class="preview-note">معاينة محلية للتجربة — لا تدخل المطابقة ولا تؤثر على التصنيف.</div><div class="preview-stage"><b id="adminPreviewStage">المرحلة 1 / 6</b><img id="adminPreviewImage" src="puzzle-1.svg" alt="صورة التجربة"></div><div class="preview-controls"><button id="adminPreviewPrev">السابق</button><button id="adminPreviewNext">التالي</button></div></section>
+</main>
+
+<main id="adminDashboard" class="admin-dashboard" hidden>
+  <header class="admin-head"><button id="adminDashBack">‹</button><div><small>ADMIN CONTROL</small><h2>لوحة الإدارة</h2></div><button id="adminRefresh" class="admin-refresh">تحديث</button></header>
+  <section class="admin-body">
+    <div class="admin-stats"><article><b id="adminUsersCount">—</b><small>اللاعبون</small></article><article><b id="adminActiveMatches">—</b><small>مباريات جارية</small></article><article><b id="adminWaitingPlayers">—</b><small>في الانتظار</small></article><article><b id="adminOpenReports">—</b><small>بلاغات مفتوحة</small></article></div>
+    <div class="admin-grid">
+      <button id="adminPreviewOpen" class="admin-tile"><b>وضع المعاينة</b><small>تجربة الصور والمراحل بدون مطابقة أو نقاط</small></button>
+      <button data-admin-section="reports" class="admin-tile"><b>البلاغات والملاحظات</b><small>مراجعة بلاغات اللاعبين ومعالجتها</small></button>
+      <button data-admin-section="players" class="admin-tile"><b>إدارة اللاعبين</b><small>بحث، حالة الحساب، حظر وفك الحظر الإداري</small></button>
+      <button data-admin-section="matches" class="admin-tile"><b>المباريات المباشرة</b><small>المباريات الجارية والمنتظرون ومراحل اللاعبين</small></button>
+      <button data-admin-section="cases" class="admin-tile"><b>إدارة التجارب</b><small>تفعيل التجربة الحالية ومعاينة مراحلها الست</small></button>
+      <button data-admin-section="logs" class="admin-tile"><b>سجل الإدارة</b><small>سجل الإجراءات الإدارية الأخيرة</small></button>
+      <button id="adminAiOpen" class="admin-tile"><b>الذكاء الاصطناعي</b><small>حفظ مفتاح OpenAI واختبار نادر من وضع المعاينة</small></button>
+    </div>
+    <section id="adminSection" class="admin-section" hidden><div class="admin-section-head"><button id="adminSectionBack">‹</button><h3 id="adminSectionTitle"></h3></div><div id="adminSectionContent"></div></section>
+  </section>
+</main>
+
+<section id="adminAiPanel" class="admin-ai-panel" hidden>
+  <header class="admin-section-head"><button id="adminAiBack">‹</button><h3>الذكاء الاصطناعي</h3></header>
+  <div class="admin-ai-body">
+    <article class="admin-card">
+      <b>اتصال السيرفر</b>
+      <small>المفتاح السري لا يُحفظ داخل التطبيق. التطبيق يرسله مرة واحدة إلى السيرفر بعد التحقق من حساب الإدارة.</small>
+      <label class="admin-ai-label" for="adminAiServer">عنوان خادم الذكاء الاصطناعي</label>
+      <input id="adminAiServer" class="admin-input" type="url" inputmode="url" autocomplete="off" placeholder="https://your-server.example.com">
+      <label class="admin-ai-label" for="adminAiKey">مفتاح OpenAI API</label>
+      <input id="adminAiKey" class="admin-input" type="password" autocomplete="off" placeholder="sk-••••••••••••••••">
+      <div class="admin-ai-actions"><button id="adminAiSave" class="admin-action good">حفظ المفتاح</button><button id="adminAiTest" class="admin-action">اختبار الاتصال</button></div>
+      <p id="adminAiStatus" class="admin-ai-status">لم يتم فحص الاتصال بعد.</p>
+    </article>
+    <article class="admin-card">
+      <div class="admin-ai-character-head"><div><b>مختبر الشخصيات — نادر</b><small>جلسة خاصة بحساب الإدارة لا تدخل في المطابقة أو النقاط.</small></div><span>PREVIEW</span></div>
+      <div id="naderPreviewChat" class="nader-preview-chat"><div class="nader-preview-empty">ابدأ الجلسة، ونادر سيبادر بالكلام من نفسه.</div></div>
+      <div class="admin-ai-actions"><button id="naderStart" class="admin-action good">بدء جلسة جديدة</button></div>
+      <div class="nader-compose"><input id="naderInput" class="admin-input" maxlength="1200" placeholder="اكتب لنادر…"><button id="naderSend" class="admin-action">إرسال</button></div>
+    </article>
+  </div>
+</section>
+<div id="helpReportPanel" class="settings-subpanel" hidden><div class="subpanel-card"><header><button id="helpReportBack">‹</button><h2>المساعدة والإبلاغ</h2></header><p class="subpanel-copy">أرسل مشكلة أو اقتراحًا وسيصل مباشرة إلى لوحة الإدارة.</p><select id="reportType" class="admin-input"><option value="bug">إبلاغ عن مشكلة</option><option value="suggestion">اقتراح أو ملاحظة</option></select><textarea id="reportText" class="admin-input admin-textarea" maxlength="1200" placeholder="اكتب التفاصيل هنا…"></textarea><button id="reportSend" class="setting-action">إرسال</button><p id="reportStatus" class="subpanel-copy"></p></div></div>
+
+<main id="worldGame" class="world-game" hidden dir="rtl" aria-label="العالم الاجتماعي">
+  <div class="world-scene" id="worldScene" aria-hidden="true"><div class="world-orb"></div><div class="world-horizon"></div><div class="world-landmark"></div><div class="world-depth"></div></div>
+  <header class="world-head">
+    <button id="worldBack" class="world-round" aria-label="العودة">‹</button>
+    <div class="world-place"><small id="worldModeLabel">العالم</small><h2 id="worldPlaceName">الشاطئ</h2></div>
+    <button id="worldPlacesOpen" class="world-places-btn">الأماكن</button>
+  </header>
+  <section class="world-presence"><div id="worldAvatars" class="world-avatars"></div><span id="worldPresenceText">الموجودون الآن</span><span id="worldNaderStatus" class="world-nader-status" hidden>نادر موجود هنا</span></section>
+  <section id="worldMessages" class="world-messages" aria-live="polite"></section>
+  <div id="worldTyping" class="world-typing" hidden></div>
+  <form id="worldComposer" class="world-composer"><input id="worldInput" maxlength="500" autocomplete="off" enterkeyhint="send" placeholder="اكتب رسالة…"><button type="submit">إرسال</button></form>
+  <aside id="worldPlaces" class="world-places" hidden><div class="world-places-card"><header><h3>أماكن العالم</h3><button id="worldPlacesClose" aria-label="إغلاق">×</button></header><p>انتقل لأي مكان. سترى عدد الموجودين قبل الدخول.</p><div id="worldPlacesGrid" class="world-places-grid"></div></div></aside>
+</main>
+<main id="storeCategoryView" class="cosmetic-view store-category-view" hidden><header class="store-category-head"><button id="storeCategoryBack">‹</button><div><small>متجر اللاعب</small><h2 id="storeCategoryTitle">الإطارات</h2></div></header><div id="storeCategoryGrid" class="cosmetic-grid"></div></main><main id="inventoryView" class="cosmetic-view" hidden><header><button id="inventoryBack">‹</button><h2>المخزون</h2></header><div id="inventoryGrid" class="cosmetic-grid"></div></main><div id="publicIdentityCard" class="public-identity-overlay" hidden><div class="public-identity-card"><button id="publicIdentityClose">×</button><div id="publicIdentityAvatar" class="public-avatar-core">ل</div><h2 id="publicIdentityName">اللاعب</h2><p id="publicIdentityUsername">@username</p><p id="publicIdentityRank">صانع الدور</p><div>المستوى <b id="publicIdentityLevel">1</b></div><div class="xp"><i id="publicIdentityXp"></i></div><div class="public-stats"><span><b id="publicIdentityRoles">0</b><small>الأدوار</small></span><span><b id="publicIdentityDone">0</b><small>المكتملة</small></span><span><b id="publicIdentityAchievement">0%</b><small>الإنجاز</small></span></div></div></div><script src="app.js"></script><script src="social.js"></script></body></html>

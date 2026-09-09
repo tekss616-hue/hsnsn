@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340">
+<defs><radialGradient id="g"><stop stop-color="#46647a" stop-opacity=".42"/><stop offset="1" stop-color="#111820" stop-opacity="0"/></radialGradient></defs>
+<rect width="600" height="340" fill="#111820"/><circle cx="300" cy="160" r="240" fill="url(#g)"/><circle cx="300" cy="165" r="82" fill="#d7dbe0"/><circle cx="300" cy="165" r="68" fill="#151a20"/><path d="M300 165V115M300 165l42 24" stroke="#d7dbe0" stroke-width="8" stroke-linecap="round"/><circle cx="300" cy="165" r="7" fill="#d7dbe0"/>
+<path d="M0 294h600" stroke="#fff" stroke-opacity=".07"/><text x="28" y="320" fill="#fff" fill-opacity=".35" font-size="16" font-family="sans-serif">INVESTIGATION / مسرح 02</text>
+</svg>
