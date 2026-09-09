@@ -14,78 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install media optimizers
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq python3-pil
-      - name: Prepare final runtime once
-        shell: bash
-        run: |
-          set -euo pipefail
-          SRC=/tmp/veilmark-src
-          mkdir -p "$SRC" app/src/main/assets/media
-          python3 - <<'PY'
-          import base64
-          from pathlib import Path
-          src=Path('branding/game-identity.webp.b64'); dst=Path('app/src/main/assets/media/game-identity.webp')
-          data=''.join(src.read_text(encoding='utf-8').split()); data+='='*(-len(data)%4); dst.write_bytes(base64.b64decode(data,validate=False))
-          PY
-          python3 tools/apply_account_social_patch.py
-          python3 tools/apply_auth_persistence_patch.py
-          python3 tools/apply_search_response_query.py
-          python3 tools/apply_native_app_polish.py
-          python3 tools/apply_legacy_username_conflict_ui.py
-          python3 tools/apply_realtime_social_patch.py
-          python3 tools/fix_realtime_chat_watch.py
-          python3 tools/apply_delete_reauth_patch.py
-          python3 tools/apply_puzzle_race.py
-          python3 tools/apply_custom_match_emblem.py
-          python3 tools/apply_in_app_updater.py
-          python3 tools/apply_gameplay_social_upgrade.py
-          python3 tools/fix_gameplay_startup_dialog.py
-          python3 tools/apply_nav_startup_fix.py
-          python3 tools/apply_settings_social_language_fix.py
-          python3 tools/fix_typing_indicator_timeout.py
-          python3 tools/apply_remaining_round_fixes.py
-          python3 tools/fix_admin_panel_visibility.py
-          python3 tools/apply_world_first_batch.py
-          python3 tools/apply_real_preview_nader.py
-          python3 tools/remove_intro.py
-          python3 tools/apply_roleplay_copy_cleanup.py
-          sed -i 's#<link rel="stylesheet" href="social.css">#<link rel="stylesheet" href="social.css"><link rel="stylesheet" href="identity.css">#' app/src/main/assets/index.html
-          rm -f app/src/main/assets/Wren-Hotel-Intro-Vertical-Final.mp4 app/src/main/assets/intro-vertical-final.mp4 app/src/main/assets/intro-runtime.mp4 app/src/main/assets/media/intro-poster.webp
-          mv "app/src/main/res/values/wren-hotel-intro-landscape.png" "$SRC/hotel-landscape.png"
-          mv "app/src/main/res/values/wren-hotel-intro-portrait.png" "$SRC/hotel-portrait.png"
-          mv "app/src/main/res/values/wren-hotel-corridor-landscape.png" "$SRC/corridor-landscape.png"
-          mv "app/src/main/res/values/wren-hotel-corridor-portrait.png" "$SRC/corridor-portrait.png"
-          mv "app/src/main/res/values/wren-hotel-crime-scene-landscape.png" "$SRC/crime-landscape.png"
-          mv "app/src/main/res/values/wren-hotel-crime-scene-portrait.png" "$SRC/crime-portrait.png"
-          mv "app/src/main/res/values/wren-hotel-suspects-desk-landscape.png" "$SRC/desk-landscape.png"
-          mv "app/src/main/res/values/wren-hotel-suspects-desk-portrait.png" "$SRC/desk-portrait.png"
-          mv "app/src/main/res/values/closed-investigator-envelope.png" "$SRC/envelope-closed.png"
-          mv "app/src/main/res/values/open-investigator-envelope.png" "$SRC/envelope-open.png"
-          mv "app/src/main/res/values/investigator-identity-paper.png" "$SRC/investigator-paper.png"
-          mv "app/src/main/res/values/mixkit-light-rain-loop-2393.wav" "$SRC/rain.wav"
-          mv "app/src/main/res/values/muffled-impact-single.wav" "$SRC/impact.wav"
-          mv "app/src/main/res/values/Police Siren (Distant) - Sound Effect _ ProSounds.mp3" "$SRC/police.mp3"
-          mv "app/src/main/res/values/Cinematic Boom - sound effect - [High quality].mp3" "$SRC/boom.mp3"
-          python3 - <<'PY'
-          from pathlib import Path
-          from PIL import Image
-          src=Path('/tmp/veilmark-src'); media=Path('app/src/main/assets/media')
-          def webp(source,dest,max_size=None,quality=82):
-              im=Image.open(source)
-              if max_size: im.thumbnail(max_size,Image.Resampling.LANCZOS)
-              im.save(dest,'WEBP',quality=quality,method=5)
-          webp(src/'envelope-closed.png',media/'envelope-closed.webp',(1024,1024),84)
-          webp(src/'envelope-open.png',media/'envelope-open.webp',(1024,1024),84)
-          PY
-          rm -rf app/src/main/assets/hq
-          rm -f app/src/main/assets/investigator-hq-responsive-pack.zip app/src/main/assets/media/investigator-paper.webp
-          python3 tools/consolidate_runtime_sources.py
-          sed -i 's/HsnsnMessagingService/RoleplayMessagingService/g' .github/workflows/build-apk.yml
       - name: Verify consolidated runtime
         shell: bash
         run: |
@@ -102,17 +30,6 @@ jobs:
           grep -q '/api/admin/nader/chat' app/src/main/assets/social.js
           ! grep -q 'const BATCH_ONE=true' app/src/main/assets/social.js
           ! grep -q 'SECOND_ROLEPLAY_BATCH=true' app/src/main/assets/social.js
-      - name: Bake generated runtime into repository
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "hsnsn-runtime-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A app/build.gradle app/src/main/assets app/src/main/java app/src/main/AndroidManifest.xml runtime-consolidated-v1
-          if ! git diff --cached --quiet; then
-            git commit -m "Bake consolidated runtime sources [skip ci]"
-            git push origin HEAD:main
-          fi
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
