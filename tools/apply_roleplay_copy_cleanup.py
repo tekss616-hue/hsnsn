@@ -11,7 +11,7 @@ for path in FILES:
 idx=Path('app/src/main/assets/index.html');html=idx.read_text(encoding='utf-8');nav='<nav class="hq-nav"><button class="active" data-main="play">اللعب</button><button id="rankingTab" data-main="ranking">التصنيف</button><button id="storeTab" data-main="store">المتجر</button><button id="openProfileTab" data-main="profile">الملف</button></nav>';html,n=re.subn(r'<nav class="hq-nav">.*?</nav>',nav,html,count=1,flags=re.S)
 if n!=1:raise SystemExit('hq-nav not found; refusing unsafe copy cleanup')
 idx.write_text(html,encoding='utf-8')
-for script in ['tools/apply_final_runtime_repairs.py','tools/apply_first_roleplay_batch.py','tools/apply_friend_push_restore.py','tools/apply_friend_push_sender.py']:
+for script in ['tools/apply_final_runtime_repairs.py','tools/apply_first_roleplay_batch_compat.py','tools/apply_friend_push_restore.py','tools/apply_friend_push_sender.py']:
     p=Path(script)
     if not p.exists():raise SystemExit(script+' missing')
     exec(compile(p.read_text(encoding='utf-8'),str(p),'exec'),{})
